@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, make_response, render_template, session
 from .extensions import api, db, jwt
 from app.config import Config
+from .resources.resource import *
 
 def create_app():
     app = Flask(__name__)
@@ -14,6 +15,10 @@ def create_app():
         
     api.init_app(app)
     db.init_app(app)
+    api.add_namespace(ns_profile)
+    
+        
+
     # jwt.init_app(app)
     
     # @app.route('/')

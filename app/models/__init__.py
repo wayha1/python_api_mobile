@@ -1,17 +1,9 @@
-from flask_restx import fields
-from app.extensions import api
+from app.extensions import db
 
-profile_model = api.model("Profile",{
-    "id": fields.String,
-    "username": fields.String,
-    "email" : fields.String,
-    "password" : fields.String,
-    "gender" : fields.boolean
-})
-
-profile_input_model = api.model("ProfileInput",{
-    "username": fields.String,
-    "email" : fields.String,
-    "password" : fields.String,
-    "gender" : fields.boolean
-})
+class Profile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), nullable=False, unique=True)
+    email = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.Text())
+    gender = db.Column(db.String(10))  # Adjust the length based on your needs
+    role = db.Column(db.String)
