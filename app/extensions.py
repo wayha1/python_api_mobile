@@ -8,6 +8,6 @@ api = Api(version='1.0', title= "ELibrary" , description="Test API")
 class SwaggerResource(Resource):
     def get(self):
         return api.swagger_ui()
-
+    
 db = SQLAlchemy()
 jwt = JWTManager()
