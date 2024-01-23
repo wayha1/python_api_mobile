@@ -11,6 +11,5 @@ class SwaggerResource(Resource):
     def get(self):
         return api.swagger_ui()
     
-    
 db = SQLAlchemy()
 jwt = JWTManager()
