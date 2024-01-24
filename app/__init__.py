@@ -1,4 +1,5 @@
 from flask import Flask
+import os
 from .config import Config
 from .extensions import api, db, jwt
 from .resources.resource import *
@@ -6,7 +7,7 @@ from .models import *
 
 def create_app():
     app = Flask(__name__)
-    
+    url = os.getenv("DATABASE_URL")
     config = Config()
     app.config.from_object(config)
     
@@ -22,6 +23,7 @@ def create_app():
     api.add_namespace(ns_auth)
     api.add_namespace(ns_category)
     api.add_namespace(ns_book)
+    api.add_namespace(ns_author)
     
     # @jwt.user_identity
     # def user_identity_lookup(user): 

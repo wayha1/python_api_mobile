@@ -61,3 +61,16 @@ book_input_model = api.model("BookInput", {
     "publisher": fields.String,
     "category_id": fields.Integer(required=True)
 })
+
+author_model = api.model("Author", {
+    "id" : fields.Integer,
+    "author_name": fields.String,
+    "author_decs": fields.String,
+    "gender": fields.String
+})
+
+author_input_model = api.model("AuthorInput",{
+    "author_name": fields.String,
+    "author_decs": fields.String,
+    "gender": fields.String
+})

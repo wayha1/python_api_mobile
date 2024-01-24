@@ -16,7 +16,16 @@ class Profile(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='profile')
-
+    
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    author_name = db.Column(db.String(50), nullable=False, unique=True)
+    author_decs = db.Column(db.String(200), nullable=False, unique=True)
+    gender = db.Column(db.String)
+    
+    # Define the one-to-many relationship with back_populates
+    books = db.relationship('Book', back_populates='author')
+    
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
@@ -30,6 +39,11 @@ class Book(db.Model):
     price = db.Column(db.String(20), nullable=False, unique=True)
     publisher = db.Column(db.String(20), nullable=False, unique=True)
     
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))  
     # Define the many-to-one relationship with back_populates
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))  
     category = db.relationship('Category', back_populates='books')
+    
+    # Define the many-to-one relationship with back_populates
+    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))  # Foreign key to establish the relationship
+    author = db.relationship('Author', back_populates='books')
+
