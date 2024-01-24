@@ -1,7 +1,7 @@
 from flask import Flask
 from .config import Config
 from .extensions import api, db, jwt
-from .resources.resource import ns_profile, ns_auth
+from .resources.resource import *
 from .models import *
 
 def create_app():
@@ -20,6 +20,8 @@ def create_app():
     
     api.add_namespace(ns_profile)
     api.add_namespace(ns_auth)
+    api.add_namespace(ns_category)
+    api.add_namespace(ns_book)
     
     # @jwt.user_identity
     # def user_identity_lookup(user): 

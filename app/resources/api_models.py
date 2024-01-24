@@ -25,3 +25,39 @@ profile_input_model = api.model("ProfileInput", {
     "gender": fields.String(required=True), 
     "role": fields.String(required=True)
 })
+
+category_model = api.model("CategoryModel", {
+    "id": fields.Integer,
+    "name": fields.String,
+    # "books": fields.List(fields.Nested(api.model('BookModel', {
+    #     'id': fields.Integer,
+    #     'title': fields.String,
+    #     'description': fields.String,
+    # })))
+})
+
+category_input_model = api.model("CategoryInputModel", {
+    "name": fields.String,
+    # "books": fields.List(fields.Nested(api.model('BookModel', {
+    #     'id': fields.Integer,
+    #     'title': fields.String,
+    #     'description': fields.String,
+    # })))
+})
+
+book_model = api.model("BookModel", {
+    "id": fields.Integer,
+    "title": fields.String,
+    "description": fields.String,
+    "price": fields.String,
+    "publisher": fields.String,
+    "category_id": fields.Integer
+})
+
+book_input_model = api.model("BookInput", {
+    "title": fields.String(required=True),
+    "description": fields.String(required=True),
+    "price": fields.String,
+    "publisher": fields.String,
+    "category_id": fields.Integer(required=True)
+})
