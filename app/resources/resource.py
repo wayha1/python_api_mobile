@@ -1,7 +1,10 @@
 from flask_restx import Resource, Namespace, abort
+from flask import request
 from flask_jwt_extended import jwt_required, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
+import os
 from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
@@ -13,7 +16,9 @@ authorizations = {
         "name": "Authorization"
     }
 }
+
 ns_auth = Namespace('auth')
+ns = Namespace('img')
 ns_profile = Namespace('profile', authorizations=authorizations)
 ns_author = Namespace('author', authorizations=authorizations)
 ns_category = Namespace('category', description='Category operations', authorizations=authorizations)
@@ -185,7 +190,7 @@ class BookAPIList(Resource):
     @ns_book.marshal_list_with(book_model)
     def get(self):
         # Include the 'author' relationship in the query to fetch author information
-        return Book.query.options(db.joinedload('author')).all()
+        return Book.query.options(db.joinedload(Book.author)).all()
 
     @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(book_input_model)
@@ -262,6 +267,7 @@ class BookAPI(Resource):
         db.session.delete(book)
         db.session.commit()
         return {}, 204
+
 @ns_author.route('/author')
 class AuthorAPIList(Resource):
     @ns_author.doc(security="jsonWebToken")
@@ -328,3 +334,44 @@ class AuthorAPI(Resource):
         db.session.delete(author)
         db.session.commit()
         return {}, 204
+    
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Assuming you have defined the ImageModel in your models
+@ns.route('/image')
+class Image(Resource):
+    # @ns_book.doc(security="jsonWebToken")
+    @ns_book.expect(image_input_model)
+    @ns_book.marshal_with(image_model)
+    def post(self):
+        file = request.files['file']
+        
+        if 'file' not in request.files:
+            return abort(400, message="No file part")
+        if file.filename == '':
+            return abort(400, message="No selected file")
+        if file and allowed_file(file.filename):
+            upload_folder = 'path/to/your/upload/folder'
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
+
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+            image = ImageModel(file_path=file_path)
+            db.session.add(image)
+            db.session.commit()
+
+            return {"message": "File uploaded successfully", "file_path": file_path}, 201
+
+        return abort(400, message="Invalid file extension")
+
+    @ns_book.doc(security="jsonWebToken")
+    @ns_book.marshal_with(image_model)
+    def get(self):
+        images = ImageModel.query.all()
+        return images
+    

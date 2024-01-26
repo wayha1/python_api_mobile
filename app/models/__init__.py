@@ -44,6 +44,25 @@ class Book(db.Model):
     category = db.relationship('Category', back_populates='books')
     
     # Define the many-to-one relationship with back_populates
-    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))  # Foreign key to establish the relationship
+    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship('Author', back_populates='books')
 
+class ImageModel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    file_path = db.Column(db.String(255), nullable=False)
+    # img = db.Column(db.Text, unique=True, nullable=False )
+    # mimetype = db.Column(db.Text, nullable=False )
+    
+class BookAuthor(db.Model):
+    __tablename__ = 'book_author'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    
+    author = db.relationship('Author', back_populates='books_association')
+    book = db.relationship('Book', back_populates='authors_association')
+
+Author.books_association = db.relationship('BookAuthor', back_populates='author')
+Book.authors_association = db.relationship('BookAuthor', back_populates='book')
