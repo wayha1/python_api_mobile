@@ -1,9 +1,10 @@
 from flask_restx import Resource, Namespace, abort
-from flask import request
+from flask import request,send_from_directory
 from flask_jwt_extended import jwt_required, create_access_token
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-
+from flask import current_app
+from cloudinary.uploader import upload
 import os
 from app.resources.api_models import *
 from app.models import *
@@ -339,39 +340,75 @@ class AuthorAPI(Resource):
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+# Assuming you have defined the ImageModel in your models
 # Assuming you have defined the ImageModel in your models
 @ns.route('/image')
 class Image(Resource):
-    # @ns_book.doc(security="jsonWebToken")
-    @ns_book.expect(image_input_model)
-    @ns_book.marshal_with(image_model)
+    @ns.expect(image_input_model)
+    @ns.marshal_with(image_model)
     def post(self):
-        file = request.files['file']
-        
-        if 'file' not in request.files:
-            return abort(400, message="No file part")
-        if file.filename == '':
-            return abort(400, message="No selected file")
-        if file and allowed_file(file.filename):
-            upload_folder = 'path/to/your/upload/folder'
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
+        try:
+            file = request.files['file']
 
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(upload_folder, filename)
-            file.save(file_path)
-            image = ImageModel(file_path=file_path)
-            db.session.add(image)
-            db.session.commit()
+            if 'file' not in request.files:
+                return abort(400, message="No file part")
+            if file.filename == '':
+                return abort(400, message="No selected file")
+            
+            if file and allowed_file(file.filename):
+                # Upload the image to Cloudinary
+                cloudinary_response = upload(file)
+                
+                # Get the Cloudinary URL of the uploaded image
+                cloudinary_url = cloudinary_response['secure_url']
+                
+                # Create an ImageModel instance with the Cloudinary URL
+                image = ImageModel(file_path=cloudinary_url)
+                db.session.add(image)
+                db.session.commit()
 
-            return {"message": "File uploaded successfully", "file_path": file_path}, 201
+                # Associate the image with a specific book using the provided book_id
+                data = ns.payload
+                book_id = data.get('book_id')
+                if book_id:
+                    book = Book.query.get(book_id)
+                    if book:
+                        book.image = image
+                        db.session.commit()
 
-        return abort(400, message="Invalid file extension")
+                return {"message": "File uploaded successfully", "file_path": cloudinary_url}, 201
 
-    @ns_book.doc(security="jsonWebToken")
-    @ns_book.marshal_with(image_model)
+            return abort(400, message="Invalid file extension")
+        except Exception as e:
+            return abort(500, message="Error uploading the file: {}".format(str(e)))
+
+    @ns.marshal_with(image_model)
     def get(self):
         images = ImageModel.query.all()
         return images
-    
+
+@ns.route('/image/<filename>')
+class ImageDetail(Resource):
+    @ns.marshal_with(image_model)
+    def get(self, filename):
+        images = ImageModel.query.filter_by(file_path=filename).all()
+        return images
+
+    @ns.expect(image_input_model)
+    @ns.marshal_with(image_model)
+    def post(self, filename):
+        # ... (your existing code)
+
+        @ns.marshal_with(image_model)
+        def delete(self, filename):
+            images = ImageModel.query.filter_by(file_path=filename).all()
+            for image in images:
+                db.session.delete(image)
+            db.session.commit()
+            return {}, 204
+
+# Add a route to serve static files
+@ns.route('/static/<filename>')
+class ServeStatic(Resource):
+    def get(self, filename):
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)

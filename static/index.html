@@ -4,12 +4,118 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Upload image</title>
+
+    <!-- Include Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-oUGxMlI01mdLO6bqWd9eAFLHOwBGigSQcjrHM5sMhqQl3D9j7DTNVhDE56kt3zkN"
+      crossorigin="anonymous"
+    />
   </head>
   <body>
-    <form action="http://127.0.0.1:5000/img/image" enctype="multipart/form-data" method="POST">
+    <form id="uploadForm" enctype="multipart/form-data">
       <input type="file" name="file" />
-      <!-- Use 'file' as the name attribute -->
-      <input type="submit" value="upload a file" />
+      <input type="button" value="Upload a file" onclick="uploadFile()" />
+      <input type="button" value="Display Data" onclick="displayData()" />
     </form>
+
+    <div id="response">
+      <!-- Use Bootstrap grid and card components for image display -->
+      <div class="container">
+        <div class="row" id="imageContainer"></div>
+      </div>
+    </div>
+
+    <script>
+      async function uploadFile() {
+        try {
+          const form = document.getElementById("uploadForm");
+          const formData = new FormData(form);
+
+          const response = await fetch("http://127.0.0.1:5000/img/image", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const responseData = await response.json();
+          document.getElementById("response").innerHTML = responseData.message;
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+
+      async function displayData() {
+        try {
+          const response = await fetch("http://127.0.0.1:5000/img/image", {
+            method: "GET",
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const responseData = await response.json();
+
+          // Check if the response has the expected structure
+          if (Array.isArray(responseData) && responseData.length > 0) {
+            // Clear the existing images
+            document.getElementById("imageContainer").innerHTML = "";
+
+            // Loop through all images and append to the container
+            responseData.forEach((imageData) => {
+              const file_path = imageData.file_path;
+
+              // Create a Bootstrap card for each image
+              const cardElement = document.createElement("div");
+              cardElement.className = "col-md-4 mb-4";
+
+              const imgElement = document.createElement("img");
+              imgElement.src = file_path;
+              imgElement.className = "card-img-top";
+              imgElement.alt = "Uploaded Image";
+
+              const cardBody = document.createElement("div");
+              cardBody.className = "card-body";
+
+              const cardTitle = document.createElement("h5");
+              cardTitle.className = "card-title";
+              cardTitle.textContent = "Image Title";
+
+              cardBody.appendChild(cardTitle);
+              cardElement.appendChild(imgElement);
+              cardElement.appendChild(cardBody);
+
+              document.getElementById("imageContainer").appendChild(cardElement);
+            });
+          } else {
+            document.getElementById("response").innerHTML = "No images found.";
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+      }
+    </script>
+
+    <!-- Include Bootstrap JS and Popper.js -->
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+      integrity="sha384-XXh3eIG7rrZ9jgSKaA7oFHAzh6uzp6oJ+szrjACGfNpj3RS3gwe8RNSFkNVRzN+d"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+      integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8sh+WyopZlFdFVIJ7E10e5S5lFef5Xh5Pa4ic"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>

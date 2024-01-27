@@ -77,7 +77,7 @@ author_input_model = api.model("AuthorInput",{
 
 image_model = api.model("ImageModel", {
     "id": fields.Integer,
-    "file_path": fields.String  # Assuming file_path is the path to the image file
+    "file_path": fields.String 
 })
 
 image_input_model = api.model("ImageInputModel", {
