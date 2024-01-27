@@ -340,34 +340,7 @@ class AuthorAPI(Resource):
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-from flask import current_app, send_from_directory
-from flask_restx import Resource, Api, Namespace, reqparse
-from flask import request, abort
-from werkzeug.utils import secure_filename
-from models import db, ImageModel, Book
-import cloudinary
-from cloudinary.uploader import upload
-
-cloudinary.config(
-    cloud_name="dwt710mdu",
-    api_key="946233553338359",
-    api_secret="e9E1rxvU3WfxwOjJsARP7ZrutuE"
-)
-
-ns = Namespace('img', description='Image operations')
-
-# Define your parser for image input
-image_input_model = ns.model('ImageInput', {
-    'file': fields.File(required=True, description='Image file', location='form')
-})
-
-# Define your model for image response
-image_model = ns.model('Image', {
-    'id': fields.Integer(readonly=True, description='Image ID'),
-    'file_path': fields.String(required=True, description='Cloudinary URL of the image'),
-    'created_at': fields.DateTime(description='Image upload timestamp')
-})
-
+# Assuming you have defined the ImageModel in your models
 @ns.route('/image')
 class Image(Resource):
     @ns.expect(image_input_model)
@@ -380,14 +353,14 @@ class Image(Resource):
                 return abort(400, message="No file part")
             if file.filename == '':
                 return abort(400, message="No selected file")
-
+            
             if file and allowed_file(file.filename):
                 # Upload the image to Cloudinary
                 cloudinary_response = upload(file)
-
+                
                 # Get the Cloudinary URL of the uploaded image
                 cloudinary_url = cloudinary_response['secure_url']
-
+                
                 # Create an ImageModel instance with the Cloudinary URL
                 image = ImageModel(file_path=cloudinary_url)
                 db.session.add(image)
@@ -412,13 +385,6 @@ class Image(Resource):
     def get(self):
         images = ImageModel.query.all()
         return images
-
-
-@ns.route('/sample/<filename>')
-class ServeStatic(Resource):
-    def get(self, filename):
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
-
 
 # @ns.route('/image/<filename>')
 # class ImageDetail(Resource):
