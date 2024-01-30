@@ -29,20 +29,10 @@ profile_input_model = api.model("ProfileInput", {
 category_model = api.model("CategoryModel", {
     "id": fields.Integer,
     "name": fields.String,
-    # "books": fields.List(fields.Nested(api.model('BookModel', {
-    #     'id': fields.Integer,
-    #     'title': fields.String,
-    #     'description': fields.String,
-    # })))
 })
 
 category_input_model = api.model("CategoryInputModel", {
     "name": fields.String,
-    # "books": fields.List(fields.Nested(api.model('BookModel', {
-    #     'id': fields.Integer,
-    #     'title': fields.String,
-    #     'description': fields.String,
-    # })))
 })
 
 book_model = api.model("BookModel", {
@@ -51,7 +41,10 @@ book_model = api.model("BookModel", {
     "description": fields.String,
     "price": fields.String,
     "publisher": fields.String,
-    "category_id": fields.Integer
+    "category_id": fields.Integer,
+    "author_id": fields.Integer,
+    "image_id": fields.Integer,
+    "pdf_id": fields.Integer
 })
 
 book_input_model = api.model("BookInput", {
@@ -59,7 +52,10 @@ book_input_model = api.model("BookInput", {
     "description": fields.String(required=True),
     "price": fields.String,
     "publisher": fields.String,
-    "category_id": fields.Integer(required=True)
+    "category_id": fields.Integer(required=True),
+    "author_id": fields.Integer(required=True),
+    "image_id": fields.Integer,
+    "pdf_id": fields.Integer
 })
 
 author_model = api.model("Author", {
@@ -81,5 +77,13 @@ image_model = api.model("ImageModel", {
 })
 
 image_input_model = api.model("ImageInputModel", {
+    "file_path": fields.String(required=True)
+})
+pdf_model = api.model("PDFModel", {
+    "id": fields.Integer,
+    "file_path": fields.String
+})
+
+pdf_input_model = api.model("PDFInputModel", {
     "file_path": fields.String(required=True)
 })

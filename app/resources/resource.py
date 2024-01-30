@@ -19,7 +19,7 @@ authorizations = {
 }
 
 ns_auth = Namespace('auth')
-ns = Namespace('img')
+# ns = Namespace('img')
 ns_profile = Namespace('profile', authorizations=authorizations)
 ns_author = Namespace('author', authorizations=authorizations)
 ns_category = Namespace('category', description='Category operations', authorizations=authorizations)
@@ -186,12 +186,12 @@ class CategoryAPI(Resource):
 
 # Book Resource
 @ns_book.route("/book")
-class BookAPIList(Resource):
+class BookResource(Resource):
     @ns_book.doc(security="jsonWebToken")
     @ns_book.marshal_list_with(book_model)
     def get(self):
-        # Include the 'author' relationship in the query to fetch author information
-        return Book.query.options(db.joinedload(Book.author)).all()
+        books = Book.query.all()
+        return books
 
     @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(book_input_model)
@@ -204,7 +204,12 @@ class BookAPIList(Resource):
         if author is None:
             return abort(400, message="Author not found.")
 
-        # Create a new book with the specified author and category
+        # Check if the provided category_id exists
+        category = Category.query.get(data["category_id"])
+        if category is None:
+            return abort(400, message="Category not found.")
+
+        # Create a new book with the specified author, category, image, and pdf
         book = Book(
             title=data["title"],
             description=data["description"],
@@ -213,8 +218,22 @@ class BookAPIList(Resource):
             category_id=data["category_id"],
             author_id=data["author_id"]
         )
+
+        # Add image if available
+        if 'image_id' in data:
+            image = ImageModel.query.get(data["image_id"])
+            if image:
+                book.image = image
+
+        # Add pdf if available
+        if 'pdf_id' in data:
+            pdf = PDFModel.query.get(data["pdf_id"])
+            if pdf:
+                book.pdf = pdf
+
         db.session.add(book)
         db.session.commit()
+
         return book, 201
 
 # Update and delete book by id
@@ -341,10 +360,10 @@ def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 # Assuming you have defined the ImageModel in your models
-@ns.route('/image')
-class Image(Resource):
-    @ns.expect(image_input_model)
-    @ns.marshal_with(image_model)
+@ns_book.route('/image')
+class ImageResource(Resource):
+    @ns_book.expect(image_input_model)
+    @ns_book.marshal_with(image_model)
     def post(self):
         try:
             file = request.files['file']
@@ -353,61 +372,54 @@ class Image(Resource):
                 return abort(400, message="No file part")
             if file.filename == '':
                 return abort(400, message="No selected file")
-            
+
             if file and allowed_file(file.filename):
-                # Upload the image to Cloudinary
                 cloudinary_response = upload(file)
-                
-                # Get the Cloudinary URL of the uploaded image
                 cloudinary_url = cloudinary_response['secure_url']
-                
-                # Create an ImageModel instance with the Cloudinary URL
+
                 image = ImageModel(file_path=cloudinary_url)
                 db.session.add(image)
                 db.session.commit()
 
-                # Associate the image with a specific book using the provided book_id
-                data = ns.payload
-                book_id = data.get('book_id')
-                if book_id:
-                    book = Book.query.get(book_id)
-                    if book:
-                        book.image = image
-                        db.session.commit()
-
-                return {"message": "File uploaded successfully", "file_path": cloudinary_url}, 201
+                return {"message": "Image uploaded successfully", "file_path": cloudinary_url}, 201
 
             return abort(400, message="Invalid file extension")
         except Exception as e:
-            return abort(500, message="Error uploading the file: {}".format(str(e)))
+            return abort(500, message="Error uploading the image: {}".format(str(e)))
 
-    @ns.marshal_with(image_model)
+    @ns_book.marshal_with(image_model)
     def get(self):
         images = ImageModel.query.all()
         return images
 
-# @ns.route('/image/<filename>')
-# class ImageDetail(Resource):
-#     @ns.marshal_with(image_model)
-#     def get(self, filename):
-#         images = ImageModel.query.filter_by(file_path=filename).all()
-#         return images
+@ns_book.route('/pdf')
+class PDFResource(Resource):
+    @ns_book.expect(pdf_input_model)
+    @ns_book.marshal_with(pdf_model)
+    def post(self):
+        try:
+            file = request.files['file']
 
-#     @ns.expect(image_input_model)
-#     @ns.marshal_with(image_model)
-#     def post(self, filename):
-#         # ... (your existing code)
+            if 'file' not in request.files:
+                return abort(400, message="No file part")
+            if file.filename == '':
+                return abort(400, message="No selected file")
 
-#         @ns.marshal_with(image_model)
-#         def delete(self, filename):
-#             images = ImageModel.query.filter_by(file_path=filename).all()
-#             for image in images:
-#                 db.session.delete(image)
-#             db.session.commit()
-#             return {}, 204
+            if file and allowed_file(file.filename):
+                cloudinary_response = upload(file)
+                cloudinary_url = cloudinary_response['secure_url']
 
-# # Add a route to serve static files
-# @ns.route('/static/<filename>')
-# class ServeStatic(Resource):
-#     def get(self, filename):
-#         return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
+                pdf = PDFModel(file_path=cloudinary_url)
+                db.session.add(pdf)
+                db.session.commit()
+
+                return {"message": "PDF uploaded successfully", "file_path": cloudinary_url}, 201
+
+            return abort(400, message="Invalid file extension")
+        except Exception as e:
+            return abort(500, message="Error uploading the PDF: {}".format(str(e)))
+
+    @ns_book.marshal_with(pdf_model)
+    def get(self):
+        pdfs = PDFModel.query.all()
+        return pdfs

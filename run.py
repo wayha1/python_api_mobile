@@ -8,5 +8,4 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    # Set debug=True to enable debugging
     app.run(port=5000, debug=True)
