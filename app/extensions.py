@@ -1,7 +1,8 @@
-
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api,Resource
 from flask_jwt_extended import JWTManager
+from flask import Blueprint
+from flask_login import LoginManager
 
 api = Api(version='1.0', title= "ELibrary" , description="Test API")
 

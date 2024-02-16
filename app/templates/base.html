@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}E libra {% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <section class="hero is-primary is-fullheight">
+      <div class="hero-head">
+        <nav class="navbar navbar-expand-lg navbar-light bg-success d-flex">
+          <div class="container">
+            <a href="{{ url_for('main.index') }}" class="navbar-brand align-items-center">
+              <span class="text-light">E-libra</span>
+            </a>
+            <div id="navbarMenuHeroA" class="navbar-menu">
+              <div class="navbar-end">
+                <ul class="nav-item d-flex">
+                  {% if current_user.is_authenticated %}
+                  <li class="nav-item d-flex">
+                    <a href="{{ url_for('main.profile') }}" class="nav-link text-light">Profile</a>
+                    <a href="{{ url_for('main.dashboard') }}" class="nav-link text-light">Dashboard</a>
+                  </li>
+                  {% endif %} {% if not current_user.is_authenticated %}
+                  <ul class="nav-item d-flex">
+                    <li class="nav-item d-flex">
+                      <a href="{{ url_for('auth.login') }}" class="nav-link text-light">Login</a>
+                    </li>
+                    <li class="nav-item d-flex">
+                      <a href="{{ url_for('auth.signup') }}" class="nav-link text-light">Sign Up</a>
+                    </li>
+                  </ul>
+                  {% endif %} {% if current_user.is_authenticated %}
+                  <li class="nav-item d-flex">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link text-light">Logout</a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <div class="hero-body">
+        <div class="container has-text-centered">{% block content %}{% endblock %}</div>
+      </div>
+    </section>
+
+    <!-- Bootstrap JS (use the CDN link or host the file locally) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

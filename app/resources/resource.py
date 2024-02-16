@@ -5,7 +5,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask import current_app
 from cloudinary.uploader import upload
-import os
 from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
@@ -355,13 +354,13 @@ class AuthorAPI(Resource):
         db.session.commit()
         return {}, 204
     
-
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 # Assuming you have defined the ImageModel in your models
 @ns_book.route('/image')
 class ImageResource(Resource):
+    # @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(image_input_model)
     @ns_book.marshal_with(image_model)
     def post(self):
@@ -386,7 +385,8 @@ class ImageResource(Resource):
             return abort(400, message="Invalid file extension")
         except Exception as e:
             return abort(500, message="Error uploading the image: {}".format(str(e)))
-
+        
+    @ns_book.doc(security="jsonWebToken")
     @ns_book.marshal_with(image_model)
     def get(self):
         images = ImageModel.query.all()
@@ -394,6 +394,7 @@ class ImageResource(Resource):
 
 @ns_book.route('/pdf')
 class PDFResource(Resource):
+    @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(pdf_input_model)
     @ns_book.marshal_with(pdf_model)
     def post(self):
@@ -418,7 +419,8 @@ class PDFResource(Resource):
             return abort(400, message="Invalid file extension")
         except Exception as e:
             return abort(500, message="Error uploading the PDF: {}".format(str(e)))
-
+    
+    @ns_book.doc(security="jsonWebToken")
     @ns_book.marshal_with(pdf_model)
     def get(self):
         pdfs = PDFModel.query.all()

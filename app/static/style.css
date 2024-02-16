@@ -1,0 +1,18 @@
+/* styles.css */
+
+/* Add additional styles here */
+
+/* Example: Increase padding on navbar items */
+.navbar-nav .nav-item {
+    padding: 0.5rem 1rem;
+}
+
+/* Example: Change hero body background color */
+.hero-body {
+    background-color: #f8f9fa;
+    /* Light gray color */
+}
+
+.navbar-nav {
+    display: flex;
+}
