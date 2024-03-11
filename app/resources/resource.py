@@ -105,7 +105,8 @@ class ProfileAPI(Resource):
                 username=data["username"],
                 email=data["email"],
                 gender=data["gender"],
-                role=data["role"]
+                role=data["role"],
+                profile_image=data["profile_image"]
             )
             db.session.add(profile)
         else:
@@ -360,7 +361,7 @@ def allowed_file(filename):
 # Assuming you have defined the ImageModel in your models
 @ns_book.route('/image')
 class ImageResource(Resource):
-    # @ns_book.doc(security="jsonWebToken")
+    @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(image_input_model)
     @ns_book.marshal_with(image_model)
     def post(self):

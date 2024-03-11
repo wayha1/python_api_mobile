@@ -2,8 +2,8 @@ from flask_restx import fields
 from app.extensions import api
 
 login_model = api.model("LoginModel", {
-    "username" : fields.String,
-    "password" : fields.String
+    "username": fields.String,
+    "password": fields.String
 })
 
 user_model = api.model("UserModel", {
@@ -11,19 +11,21 @@ user_model = api.model("UserModel", {
     "username": fields.String
 })
 
-profile_model = api.model("Profile", {
+profile_model = api.model("ProfileModel", {
     "id": fields.Integer,
     "username": fields.String,
     "email": fields.String,
-    "gender": fields.String, 
-    "role": fields.String
+    "gender": fields.String,
+    "role": fields.String,
+    "profile_image": fields.String(attribute=lambda x: x.profile_image)
 })
 
-profile_input_model = api.model("ProfileInput", {
+profile_input_model = api.model("ProfileInputModel", {
     "username": fields.String(required=True),
     "email": fields.String(required=True),
-    "gender": fields.String(required=True), 
-    "role": fields.String(required=True)
+    "gender": fields.String(required=True),
+    "role": fields.String(required=True),
+    "profile_image": fields.String
 })
 
 category_model = api.model("CategoryModel", {
@@ -47,7 +49,7 @@ book_model = api.model("BookModel", {
     "pdf_id": fields.Integer
 })
 
-book_input_model = api.model("BookInput", {
+book_input_model = api.model("BookInputModel", {
     "title": fields.String(required=True),
     "description": fields.String(required=True),
     "price": fields.String,
@@ -58,27 +60,30 @@ book_input_model = api.model("BookInput", {
     "pdf_id": fields.Integer
 })
 
-author_model = api.model("Author", {
-    "id" : fields.Integer,
+author_model = api.model("AuthorModel", {
+    "id": fields.Integer,
     "author_name": fields.String,
     "author_decs": fields.String,
-    "gender": fields.String
+    "gender": fields.String,
+    "author_image": fields.String(attribute=lambda x: x.author_image)
 })
 
-author_input_model = api.model("AuthorInput",{
+author_input_model = api.model("AuthorInputModel", {
     "author_name": fields.String,
     "author_decs": fields.String,
-    "gender": fields.String
+    "gender": fields.String,
+    "author_image": fields.String
 })
 
 image_model = api.model("ImageModel", {
     "id": fields.Integer,
-    "file_path": fields.String 
+    "file_path": fields.String
 })
 
 image_input_model = api.model("ImageInputModel", {
     "file_path": fields.String(required=True)
 })
+
 pdf_model = api.model("PDFModel", {
     "id": fields.Integer,
     "file_path": fields.String

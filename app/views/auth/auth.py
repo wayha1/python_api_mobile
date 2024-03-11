@@ -4,13 +4,11 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import PasswordInput
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, LoginManager , logout_user
-from werkzeug.security import check_password_hash
+from flask_login import login_user, LoginManager, logout_user
 from app.models import User
 from app.extensions import db
 
 auth_bp = Blueprint('auth', __name__)
-
 login_manager = LoginManager()  # Create an instance of LoginManager
 
 class LoginForm(FlaskForm):
@@ -56,7 +54,7 @@ def signup_post():
         flash('Username already exists. Please choose a different one.', 'danger')
         return redirect(url_for('auth.signup'))
     
-    new_user = User(username=username, password=generate_password_hash(password, method='sha256'))
+    new_user = User(username=username, password_hash=generate_password_hash(password, method='pbkdf2:sha256'))
     
     db.session.add(new_user)
     db.session.commit()

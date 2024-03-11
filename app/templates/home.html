@@ -1,8 +1,7 @@
 {% extends 'base.html' %} {% block content %}
-<form id="uploadForm" enctype="multipart/form-data">
+<form id="uploadForm" action="{{ url_for('main.home') }}" method="POST" enctype="multipart/form-data">
   <input type="file" name="file" id="fileInput" />
-  <input type="button" value="Upload a file" onclick="uploadFile()" />
-  <input type="button" value="Display Data" onclick="displayData()" />
+  <button type="submit">Upload a file</button>
 </form>
 
 <div id="response">
@@ -11,88 +10,4 @@
     <div class="row" id="imageContainer"></div>
   </div>
 </div>
-
-<script>
-  async function uploadFile() {
-    try {
-      const form = document.getElementById("uploadForm");
-      const formData = new FormData(form);
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token available.");
-      }
-
-      const response = await fetch("http://127.0.0.1:5000/book/image", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Authorization: "Bearer " + token,
-        }
-        console.log(localStorage.getItem("token"));
-
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      document.getElementById("response").innerHTML = responseData.message;
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      document.getElementById("response").innerHTML = "Error uploading file: " + error.message;
-    }
-  }
-
-  async function displayData() {
-    try {
-      const response = await fetch("http://127.0.0.1:5000/book/image", {
-        method: "GET",
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-
-      if (Array.isArray(responseData) && responseData.length > 0) {
-        document.getElementById("imageContainer").innerHTML = "";
-
-        // Loop through all images and append to the container
-        responseData.forEach((imageData) => {
-          const file_path = imageData.file_path;
-
-          // Create a Bootstrap card for each image
-          const cardElement = document.createElement("div");
-          cardElement.className = "col-md-4 mb-4";
-
-          const imgElement = document.createElement("img");
-          imgElement.src = file_path;
-          imgElement.className = "card-img-top";
-          imgElement.alt = "Uploaded Image";
-
-          const cardBody = document.createElement("div");
-          cardBody.className = "card-body";
-
-          const cardTitle = document.createElement("h5");
-          cardTitle.className = "card-title";
-          cardTitle.textContent = "Image Title";
-
-          cardBody.appendChild(cardTitle);
-          cardElement.appendChild(imgElement);
-          cardElement.appendChild(cardBody);
-
-          document.getElementById("imageContainer").appendChild(cardElement);
-        });
-      } else {
-        document.getElementById("response").innerHTML = "No images found.";
-      }
-    } catch (error) {
-      console.error("Error displaying data:", error);
-      document.getElementById("response").innerHTML = "Error displaying data: " + error.message;
-    }
-  }
-</script>
 {% endblock %}

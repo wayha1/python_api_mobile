@@ -14,6 +14,7 @@ class Profile(db.Model):
     email = db.Column(db.String(50), nullable=False, unique=True)
     gender = db.Column(db.String(10))
     role = db.Column(db.String)
+    profile_image = db.Column(db.String(255))
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='profile')
@@ -23,6 +24,7 @@ class Author(db.Model):
     author_name = db.Column(db.String(50), nullable=False, unique=True)
     author_decs = db.Column(db.String(200), nullable=False, unique=True)
     gender = db.Column(db.String)
+    author_image = db.Column(db.String(255), nullable=False)
     
     # Define the one-to-many relationship with back_populates
     books = db.relationship('Book', back_populates='author')
@@ -84,3 +86,25 @@ class BookAuthor(db.Model):
 
 Author.books_association = db.relationship('BookAuthor', back_populates='author')
 Book.authors_association = db.relationship('BookAuthor', back_populates='book')
+
+class UserBook(db.Model):
+    tablename = 'user_book'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    
+    user = db.relationship('User', back_populates='books')
+    book = db.relationship('Book', back_populates='users')
+
+User.books = db.relationship('UserBook', back_populates='user')
+Book.users = db.relationship('UserBook', back_populates='book')
+
+class AccessToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    token = db.Column(db.String(256), unique=True, nullable=False)
+
+    def repr(self):
+        return f"<AccessToken {self.id}>"
