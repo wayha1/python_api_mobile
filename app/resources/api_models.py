@@ -5,16 +5,28 @@ login_model = api.model("LoginModel", {
     "username": fields.String,
     "password": fields.String
 })
+register_model = api.model("RegisterModel",{
+    "username": fields.String,
+    "email": fields.String,
+    "password": fields.String,
+    "gender": fields.String,
+    "role": fields.String,
+})
 
 user_model = api.model("UserModel", {
     "id": fields.Integer,
-    "username": fields.String
+    "username": fields.String,
+    "email": fields.String,
+    "password_hash": fields.String,
+    "gender": fields.String,
+    "role": fields.String,
 })
 
 profile_model = api.model("ProfileModel", {
     "id": fields.Integer,
     "username": fields.String,
     "email": fields.String,
+    "password_hash": fields.String,
     "gender": fields.String,
     "role": fields.String,
     "profile_image": fields.String(attribute=lambda x: x.profile_image)
@@ -23,6 +35,7 @@ profile_model = api.model("ProfileModel", {
 profile_input_model = api.model("ProfileInputModel", {
     "username": fields.String(required=True),
     "email": fields.String(required=True),
+    "password_hash": fields.String,
     "gender": fields.String(required=True),
     "role": fields.String(required=True),
     "profile_image": fields.String

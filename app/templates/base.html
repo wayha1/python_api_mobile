@@ -8,12 +8,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
     <style>
       html,
-      body,
-      .container-fluid,
-      .row,
-      .sidebar,
-      .main {
+      body {
         height: 100%;
+      }
+      .container-fluid {
+        height: 100%;
+        padding-right: 0;
+        padding-left: 0;
+      }
+      .sidebar {
+        height: 100%;
+        background-color: #343a40; /* Sidebar background color */
+        padding: 20px; /* Adjust as needed */
+      }
+      .sidebar-sticky {
+        position: sticky;
+        top: 0;
+        padding-bottom: 20px; /* Adjust as needed */
+      }
+      .nav-link {
+        color: #fff; /* Link text color */
+      }
+      .nav-link:hover {
+        color: #ccc; /* Link hover color */
+      }
+      .navbar {
+        margin-bottom: 0;
       }
     </style>
   </head>
@@ -21,25 +41,30 @@
     <div class="container-fluid">
       <div class="row">
         <!-- Sidebar -->
-        <aside class="col-md-3 col-lg-2 sidebar aside1">
+        <aside class="col-md-3 col-lg-3 sidebar bg-dark">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               {% if current_user.is_authenticated %}
-              <li class="nav-item">
-                <a href="{{ url_for('main.profile') }}" class="nav-link text-light">Profile</a>
+              <h1 class="text-light my-5 text-center">Dashboard</h1>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a>
               </li>
-              <li class="nav-item">
-                <a href="{{ url_for('main.dashboard') }}" class="nav-link text-light">Dashboard</a>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('main.author') }}" class="nav-link">Author</a>
               </li>
-              <li class="nav-item">
-                <a href="{{ url_for('auth.logout') }}" class="nav-link text-light">Logout</a>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('main.book') }}" class="nav-link">Book</a>
               </li>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
+              </li>
+
               {% else %}
-              <li class="nav-item">
-                <a href="{{ url_for('auth.login') }}" class="nav-link text-light">Login</a>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
               </li>
-              <li class="nav-item">
-                <a href="{{ url_for('auth.signup') }}" class="nav-link text-light">Sign Up</a>
+              <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('auth.signup') }}" class="nav-link">Sign Up</a>
               </li>
               {% endif %}
             </ul>
@@ -47,17 +72,21 @@
         </aside>
 
         <!-- Content -->
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 main">
-          <div class="container-fluid">
-            {% block content %}
-            <div class="row">
-              <div class="col-lg-12">
-                <h1 class="mt-5">E-libra</h1>
-              </div>
+        <div class="w-auto col-lg-9 col-md-9">
+          <section class="hero">
+            <div class="hero-head">
+              <nav class="navbar navbar-expand-lg d-flex navbar-light py-4 bg-dark justify-content-between">
+                <a href="{{ url_for('main.index') }}" class="navbar-brand text-light text-center"
+                  >E-libra-API</a
+                >
+                <span class="d-flex navbar-brand text-light text-center mr-5">Welcome! {{username}}</span>
+              </nav>
             </div>
-            {% endblock %}
-          </div>
-        </main>
+            <div class="hero-body">
+              <div class="container has-text-centered">{% block content %}{% endblock %}</div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
 

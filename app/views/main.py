@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import ImageModel,Profile
+from app.models import *
 from app.extensions import db
 from cloudinary.uploader import upload
 
@@ -13,6 +13,7 @@ def index():
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    username = current_user.username
     if request.method == 'POST':
         try:
             username = request.form['username']
@@ -43,16 +44,18 @@ def profile():
         except Exception as e:
             flash('Error creating profile: {}'.format(str(e)), 'error')
 
-    return render_template('profile.html')
-@main.route('/dashboard')
-@login_required
-def dashboard():
-    username = current_user.username
-    return render_template('dashboard.html', username=username)
+    return render_template('profile.html', username= username)
 
-@main.route('/dash', methods=['GET', 'POST'])
+@main.route('/author', methods=['GET', 'POST'])
 @login_required
-def home():
+def author():
+    username = current_user.username
+    return render_template('author.html', username=username)
+
+@main.route('/book', methods=['GET', 'POST'])
+@login_required
+def book():
+    username = current_user.username
     if request.method == 'POST':
         try:
             file = request.files['file']
@@ -72,8 +75,16 @@ def home():
             flash('Error uploading the image: {}'.format(str(e)), 'error')
 
     images = ImageModel.query.all()
-    return render_template('home.html', images=images)
+    return render_template('book.html', images=images,username=username)
 
+@main.route('/dashboard')
+@login_required
+def dashboard():
+    username = current_user.username
+    return render_template('dashboard.html', username=username)
+
+
+    
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

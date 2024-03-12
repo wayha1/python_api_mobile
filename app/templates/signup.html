@@ -7,29 +7,38 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
   </head>
-  <body class="bg-success">
+  <body class="back-form">
     <div class="container">
-      <div class="row">
+      <div class="background">
         <div class="col-md-6">
           <div class="card">
-           <div class="card-body">
-            <h2 class="text-center mb-4">Sign Up</h2>
             <div class="card-body">
-              <form method="post" action="{{ url_for('auth.signup_post') }}">
-                {{ form.hidden_tag() }}
-                <div class="form-group">
-                  {{ form.username.label(class="form-label") }} {{ form.username(class="form-control") }}
+              <h2 class="text-center mb-4">Sign Up</h2>
+              {% if success %}
+              <div class="alert alert-success" role="alert">Sign up successful! You can now login.</div>
+              {% endif %}
+              <div class="card-body">
+                <form method="post" action="{{ url_for('auth.signup_post') }}">
+                  {{ form.hidden_tag() }}
+                  <div class="form-group">
+                    {{ form.username.label(class="form-label") }} {{ form.username(class="form-control") }}
+                  </div>
+                  <div class="form-group">
+                    {{ form.email.label(class="form-label") }} {{ form.email(class="form-control") }}
+                  </div>
+                  <div class="form-group">
+                    {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}
+                  </div>
+                  <div class="form-group">
+                    {{ form.gender.label(class="form-label") }} {{ form.gender(class="form-control") }}
+                  </div>
+                  <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </form>
+                <div class="signUp">
+                  <a href="/login">Back to login!</a>
                 </div>
-                <div class="form-group">
-                  {{ form.password.label(class="form-label") }} {{ form.password(class="form-control") }}
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
-              </form>
-              <div class="signUp">
-                <a href="/login">Back to login!</a>
               </div>
             </div>
-           </div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ from wtforms.widgets import PasswordInput
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, LoginManager, logout_user
-from app.models import User
+from app.models import *
 from app.extensions import db
 
 auth_bp = Blueprint('auth', __name__)
@@ -13,7 +13,9 @@ login_manager = LoginManager()  # Create an instance of LoginManager
 
 class LoginForm(FlaskForm):
     username = StringField('Username', [DataRequired()], render_kw={'placeholder': 'username'})
+    email = StringField('Email', [DataRequired()], render_kw={'placeholder': 'email'})
     password = PasswordField('Password', widget=PasswordInput(hide_value=True), validators=[DataRequired()], render_kw={'placeholder': 'password'})
+    gender = StringField('Gender', [DataRequired()], render_kw={'placeholder': 'gender'})
     remember = BooleanField('Remember me')
     submit_login = SubmitField('Login')
 
@@ -46,7 +48,9 @@ def signup():
 @auth_bp.route('/signup', methods=['POST'])
 def signup_post():
     username = request.form.get('username')
+    email = request.form.get('email')
     password = request.form.get('password')
+    gender = request.form.get('gender')
     
     user = User.query.filter_by(username=username).first()
     
@@ -54,9 +58,19 @@ def signup_post():
         flash('Username already exists. Please choose a different one.', 'danger')
         return redirect(url_for('auth.signup'))
     
-    new_user = User(username=username, password_hash=generate_password_hash(password, method='pbkdf2:sha256'))
+    new_user = User(username=username, 
+                    email=email,
+                    password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
+                    gender=gender)
     
     db.session.add(new_user)
+    db.session.commit()
+    
+    new_profile = Profile(username=username, 
+                    email=email,
+                    password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
+                    gender=gender)
+    db.session.add(new_profile)
     db.session.commit()
     
     flash('Account created successfully! You can now log in.', 'success')

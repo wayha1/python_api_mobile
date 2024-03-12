@@ -33,23 +33,38 @@ ns_book.decorators = [jwt_required()]
 # Register User (username and password)
 @ns_auth.route('/register')
 class Register(Resource): 
-    @ns_profile.expect(login_model)
-    @ns_profile.marshal_with(user_model)
+    @ns_auth.expect(register_model)
+    @ns_auth.marshal_with(user_model)
     def post(self):
-        user = User(username=ns_profile.payload['username'], password_hash=generate_password_hash(ns_profile.payload["password"]))
+        user = User(username=ns_auth.payload['username'],
+                    email=ns_auth.payload['email'],
+                    password_hash=generate_password_hash(ns_auth.payload['password']),
+                    gender=ns_auth.payload['gender'],
+                    role=ns_auth.payload['role'])
+        
         db.session.add(user)
         db.session.commit()
-        return user, 201
+        
+        # Create a corresponding profile
+        profile = Profile(username=ns_auth.payload['username'],
+                    email=ns_auth.payload['email'],
+                    password_hash=generate_password_hash(ns_auth.payload['password']),
+                    gender=ns_auth.payload['gender'],
+                    role=ns_auth.payload['role'])
+        db.session.add(profile)
+        db.session.commit()
+
+        return user,  201
     
 # Login Endpoint
 @ns_auth.route('/login')
 class Login(Resource):
-    @ns_profile.expect(login_model)
+    @ns_auth.expect(login_model)
     def post(self):
-        user = User.query.filter_by(username=ns_profile.payload["username"]).first()
+        user = User.query.filter_by(username=ns_auth.payload["username"]).first()
         if not user:
             return {"error": "User does not exist"}, 401
-        if not check_password_hash(user.password_hash, ns_profile.payload["password"]):
+        if not check_password_hash(user.password_hash, ns_auth.payload["password"]):
             return {"error": "Incorrect Password"}, 401
         return {"access_token": create_access_token(user.username)}
     
