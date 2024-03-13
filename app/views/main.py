@@ -1,14 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from app.models import *
+from app.models import * 
 from app.extensions import db
 from cloudinary.uploader import upload
+from app.views.auth.form import CategoryForm
 
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
     return render_template('index.html')
+
+from flask import request  # Import request module
 
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -44,7 +47,24 @@ def profile():
         except Exception as e:
             flash('Error creating profile: {}'.format(str(e)), 'error')
 
-    return render_template('profile.html', username= username)
+    return render_template('profile.html', username=username)
+
+@main.route('/category', methods=['GET', 'POST'])
+@login_required
+def category():
+    username = current_user.username
+    form = CategoryForm()  
+    if form.validate_on_submit():
+        name = form.name.data
+        
+        category = Category(name=name)
+        db.session.add(category)
+        db.session.commit()
+        
+        flash('Category added successfully', 'success')
+        return redirect(url_for('main.category'))
+    
+    return render_template('category.html', form=form, username=username)
 
 @main.route('/author', methods=['GET', 'POST'])
 @login_required
@@ -82,7 +102,6 @@ def book():
 def dashboard():
     username = current_user.username
     return render_template('dashboard.html', username=username)
-
 
     
 def allowed_file(filename):

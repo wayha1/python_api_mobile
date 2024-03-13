@@ -2,10 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api,Resource
 from flask_jwt_extended import JWTManager
 from flask import Blueprint
+from app.authorize import authorizations
 from flask_login import LoginManager
 
-api = Api(version='1.0', title= "ELibrary" , description="Test API")
 
+api = Api(version='1.0', title= "ELibrary" , description="Test API" , authorizations=authorizations)
 
 @api.route('/swagger')
 class SwaggerResource(Resource):
@@ -14,3 +15,4 @@ class SwaggerResource(Resource):
     
 db = SQLAlchemy()
 jwt = JWTManager()
+login_manager = LoginManager()

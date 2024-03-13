@@ -1,5 +1,5 @@
 from flask_restx import fields
-from app.extensions import api
+from app.extensions import *
 
 login_model = api.model("LoginModel", {
     "username": fields.String,

@@ -8,17 +8,10 @@ from cloudinary.uploader import upload
 from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
+from app.authorize import authorizations
 
-authorizations = {
-    "jsonWebToken" : {
-        "type": "apiKey",
-        "in" : "header",
-        "name": "Authorization"
-    }
-}
-
-ns_auth = Namespace('auth')
 # ns = Namespace('img')
+ns_auth = Namespace('auth')
 ns_profile = Namespace('profile', authorizations=authorizations)
 ns_author = Namespace('author', authorizations=authorizations)
 ns_category = Namespace('category', description='Category operations', authorizations=authorizations)

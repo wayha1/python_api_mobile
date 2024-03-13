@@ -1,31 +1,22 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
-from wtforms.validators import DataRequired
-from wtforms.widgets import PasswordInput
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, LoginManager, logout_user
+from flask_login import login_user, logout_user, current_user
+from .form import LoginForm
 from app.models import *
-from app.extensions import db
+from app.extensions import *
 
-auth_bp = Blueprint('auth', __name__)
-login_manager = LoginManager()  # Create an instance of LoginManager
-
-class LoginForm(FlaskForm):
-    username = StringField('Username', [DataRequired()], render_kw={'placeholder': 'username'})
-    email = StringField('Email', [DataRequired()], render_kw={'placeholder': 'email'})
-    password = PasswordField('Password', widget=PasswordInput(hide_value=True), validators=[DataRequired()], render_kw={'placeholder': 'password'})
-    gender = StringField('Gender', [DataRequired()], render_kw={'placeholder': 'gender'})
-    remember = BooleanField('Remember me')
-    submit_login = SubmitField('Login')
+auth_bp = Blueprint('auth', __name__ )
 
 @auth_bp.route('/login')
 def show_login():
     form = LoginForm()
     return render_template('login.html', form=form)
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # if current_user.is_authenticated:
+    #     return redirect(url_for('main.index'))
+    
     username = request.form.get('username')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
@@ -38,7 +29,7 @@ def login():
         return redirect(url_for('main.profile'))
     else:
         flash('Invalid username or password. Please try again.', 'danger')
-        return redirect(url_for('auth.show_login'))  # Redirect to login page on unsuccessful login
+        return redirect(url_for('auth.show_login')) 
 
 @auth_bp.route('/signup')
 def signup():
@@ -63,18 +54,16 @@ def signup_post():
                     password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
                     gender=gender)
     
-    db.session.add(new_user)
-    db.session.commit()
-    
     new_profile = Profile(username=username, 
                     email=email,
                     password_hash=generate_password_hash(password, method='pbkdf2:sha256'),
                     gender=gender)
+    
+    db.session.add(new_user)
     db.session.add(new_profile)
     db.session.commit()
     
-    flash('Account created successfully! You can now log in.', 'success')
-    return redirect(url_for('auth.show_login'))
+    return redirect(url_for('main.author'))
 
 @auth_bp.route('/logout')
 def logout():

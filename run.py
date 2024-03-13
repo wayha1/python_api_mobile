@@ -1,9 +1,8 @@
-from app import create_app
+from app import create_app, db
 
 app = create_app()
 
 with app.app_context():
-    from app.extensions import db
     from app.models import *
     db.create_all()
 
