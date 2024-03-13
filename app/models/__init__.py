@@ -4,8 +4,8 @@ from flask_login import UserMixin
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    email = db.Column(db.String(50), nullable=False, unique=True)
-    password_hash = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password_hash = db.Column(db.String, nullable=False)
     gender = db.Column(db.String(10))
     role = db.Column(db.String)
     
@@ -14,11 +14,11 @@ class User(db.Model, UserMixin):
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
-    email = db.Column(db.String(50), nullable=False, unique=True)
-    password_hash = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password_hash = db.Column(db.String, nullable=False)
     gender = db.Column(db.String(10))
     role = db.Column(db.String)
-    profile_image = db.Column(db.String(255))
+    profile_image = db.Column(db.String,nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='profile')
@@ -74,8 +74,7 @@ class PDFModel(db.Model):
     file_path = db.Column(db.String(255), nullable=False)
 
     # Define the one-to-one relationship with back_populates
-    book = db.relationship('Book', back_populates='pdf', uselist=False)  
-    
+    book = db.relationship('Book', back_populates='pdf', uselist=False)    
     
 class BookAuthor(db.Model):
     __tablename__ = 'book_author'
@@ -90,6 +89,22 @@ class BookAuthor(db.Model):
 
 Author.books_association = db.relationship('BookAuthor', back_populates='author')
 Book.authors_association = db.relationship('BookAuthor', back_populates='book')
+
+    
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+
+    # Define the relationship with back_populates
+    user = db.relationship('User', back_populates='cart')
+    book = db.relationship('Book', back_populates='carts')
+
+
+# Modify the User and Book models to include the relationships with Cart
+User.cart = db.relationship('Cart', back_populates='user')
+Book.carts = db.relationship('Cart', back_populates='book')
 
 class UserBook(db.Model):
     tablename = 'user_book'

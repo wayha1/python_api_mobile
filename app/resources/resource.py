@@ -36,21 +36,24 @@ class Register(Resource):
     @ns_auth.expect(register_model)
     @ns_auth.marshal_with(user_model)
     def post(self):
-        user = User(username=ns_auth.payload['username'],
-                    email=ns_auth.payload['email'],
-                    password_hash=generate_password_hash(ns_auth.payload['password']),
-                    gender=ns_auth.payload['gender'],
-                    role=ns_auth.payload['role'])
+        data = ns_auth.payload
+        
+        user = User(username=data['username'],
+                    email=data['email'],
+                    password_hash=generate_password_hash(data['password']),
+                    gender=data['gender'],
+                    role='user')
         
         db.session.add(user)
         db.session.commit()
         
         # Create a corresponding profile
-        profile = Profile(username=ns_auth.payload['username'],
-                    email=ns_auth.payload['email'],
-                    password_hash=generate_password_hash(ns_auth.payload['password']),
-                    gender=ns_auth.payload['gender'],
-                    role=ns_auth.payload['role'])
+        profile = Profile(username=data['username'],
+                    email=data['email'],
+                    password_hash=generate_password_hash(data['password']),
+                    gender=data['gender'],
+                    role='user')
+        
         db.session.add(profile)
         db.session.commit()
 
@@ -143,39 +146,39 @@ class ProfileAPI(Resource):
         db.session.commit()
         return {}, 204
 
-@ns_category.route("/category")
+@ns_book.route("/category")
 class CategoryAPIList(Resource):
-    @ns_category.doc(security="jsonWebToken")
-    @ns_category.marshal_list_with(category_model)
+    @ns_book.doc(security="jsonWebToken")
+    @ns_book.marshal_list_with(category_model)
     def get(self):
         return Category.query.all()
 
-    @ns_category.doc(security="jsonWebToken")
-    @ns_category.expect(category_input_model)
-    @ns_category.marshal_with(category_model)
+    @ns_book.doc(security="jsonWebToken")
+    @ns_book.expect(category_input_model)
+    @ns_book.marshal_with(category_model)
     def post(self):
-        data = ns_category.payload
+        data = ns_book.payload
         category = Category(name=data["name"])
         db.session.add(category)
         db.session.commit()
         return category, 201
 
 # Update and delete category by id
-@ns_category.route('/category/<int:id>') 
+@ns_book.route('/category/<int:id>') 
 class CategoryAPI(Resource):
-    @ns_category.doc(security="jsonWebToken")
-    @ns_category.marshal_with(category_model)
+    @ns_book.doc(security="jsonWebToken")
+    @ns_book.marshal_with(category_model)
     def get(self, id):
         category = Category.query.get(id)
         if category is None:
             return abort(404, message="Category not found.")
         return category
     
-    @ns_category.doc(security="jsonWebToken")
-    @ns_category.expect(category_input_model)
-    @ns_category.marshal_with(category_model)
+    @ns_book.doc(security="jsonWebToken")
+    @ns_book.expect(category_input_model)
+    @ns_book.marshal_with(category_model)
     def put(self, id):
-        data = ns_category.payload
+        data = ns_book.payload
         category = Category.query.get(id)
 
         if category is None:
@@ -189,7 +192,7 @@ class CategoryAPI(Resource):
         db.session.commit()
         return category
     
-    @ns_category.doc(security="jsonWebToken")
+    @ns_book.doc(security="jsonWebToken")
     def delete(self, id):
         category = Category.query.get(id)
         if category is None:
