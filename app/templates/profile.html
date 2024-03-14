@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} 
+{% block content %}
 
 <div class="container">
   <div class="row">
@@ -40,11 +41,50 @@
               </td>
             </tr>
             <tr>
-              <td colspan="2"><button type="submit" class="btn btn-primary">Submit</button></td>
+              <td colspan="2">
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </td>
             </tr>
           </tbody>
         </table>
       </form>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 offset-md-2 ">
+      <h2>Profile List</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Gender</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for profile in profiles %}
+          <tr>
+            <td>{{ profile.username }}</td>
+            <td>{{ profile.email }}</td>
+            <td>{{ profile.gender }}</td>
+            <td>{{ profile.role }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('main.edit_profile', id=profile.id) }}">
+                <button type="submit" class="btn btn-sm btn-info">Edit</button>
+              </form>
+              <form method="POST" action="{{ url_for('main.delete_profile', id=profile.id) }}">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

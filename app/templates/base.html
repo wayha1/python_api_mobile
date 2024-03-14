@@ -47,6 +47,9 @@
               {% if current_user.is_authenticated %}
               <h1 class="text-light my-5 text-center">Dashboard</h1>
               <li class="nav-item my-3 text-center">
+                <a href="{{ url_for('main.category') }}" class="nav-link">Category</a>
+              </li>
+              <li class="nav-item my-3 text-center">
                 <a href="{{ url_for('main.profile') }}" class="nav-link">Profile</a>
               </li>
               <li class="nav-item my-3 text-center">

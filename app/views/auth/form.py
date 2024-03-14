@@ -12,6 +12,5 @@ class LoginForm(FlaskForm):
     submit_login = SubmitField('Login')
     
 class CategoryForm(FlaskForm):
-    name = StringField('Category Name', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
+    name = StringField('Category Name', validators=[DataRequired()], render_kw={'placeholder': 'Enter category'})
     submit = SubmitField('Submit')

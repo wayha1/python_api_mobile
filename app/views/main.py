@@ -53,7 +53,9 @@ def profile():
 @login_required
 def category():
     username = current_user.username
-    form = CategoryForm()  
+    form = CategoryForm()
+    
+    # Create operation
     if form.validate_on_submit():
         name = form.name.data
         
@@ -64,7 +66,32 @@ def category():
         flash('Category added successfully', 'success')
         return redirect(url_for('main.category'))
     
-    return render_template('category.html', form=form, username=username)
+    # Read operation
+    categories = Category.query.all()
+    
+    # Update operation
+    if request.method == 'POST':
+        if 'edit_category' in request.form:
+            category_id = request.form.get('category_id')
+            new_name = request.form.get('new_name')
+            category = Category.query.get(category_id)
+            if category:
+                category.name = new_name
+                db.session.commit()
+                flash('Category updated successfully', 'success')
+                return redirect(url_for('main.category'))
+        
+        # Delete operation
+        elif 'delete_category' in request.form:
+            category_id = request.form.get('category_id')
+            category = Category.query.get(category_id)
+            if category:
+                db.session.delete(category)
+                db.session.commit()
+                flash('Category deleted successfully', 'success')
+                return redirect(url_for('main.category'))
+    
+    return render_template('category.html', form=form, username=username, categories=categories)
 
 @main.route('/author', methods=['GET', 'POST'])
 @login_required

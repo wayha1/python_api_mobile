@@ -40,10 +40,5 @@ def create_app():
     def user_lookup_callback(_jwt_header, jwt_data):
         identity = jwt_data["sub"]
         return User.query.filter_by(username=identity).one_or_none()
-    
-    @login_manager.user_loader
-    def load_user(username):
-        return User.query.get(username)
 
-    
     return app
