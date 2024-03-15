@@ -1,62 +1,10 @@
-{% extends "base.html" %} 
-{% block content %}
+{% extends "base.html" %} {% block title %}Profile{% endblock %} {% block content %}
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 offset-md-2 ">
-      <h2>Profile Input Form</h2>
-      <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.profile') }}>
-        <table class="table">
-          <tbody>
-            <tr>
-              <th>Username:</th>
-              <td><input type="text" name="username" class="form-control" required /></td>
-            </tr>
-            <tr>
-              <th>Email:</th>
-              <td><input type="email" name="email" class="form-control" required /></td>
-            </tr>
-            <tr>
-              <th>Gender:</th>
-              <td>
-                <select name="gender" class="form-control" required>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Role:</th>
-              <td>
-                <select name="role" class="form-control" required>
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>Profile Image:</th>
-              <td>
-                <input type="file" name="profile_image" class="form-control-file" accept="image/*" required />
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2">
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 offset-md-2 ">
-      <h2>Profile List</h2>
+<div class="d-flex w-100 justify-content-center align-content-center">
+  <div class="shadow-lg h-auto w-70 d-flex px-3 py-4 m-2">
+    <div class="container">
       <table class="table">
+        <h2 class="text-center h-auto bg-secondary text-light">Profile Management List</h2>
         <thead>
           <tr>
             <th>Username</th>
@@ -67,17 +15,31 @@
           </tr>
         </thead>
         <tbody>
-          {% for profile in profiles %}
+          {% for profiles in profiles %}
           <tr>
             <td>{{ profile.username }}</td>
             <td>{{ profile.email }}</td>
             <td>{{ profile.gender }}</td>
             <td>{{ profile.role }}</td>
-            <td>
-              <form method="POST" action="{{ url_for('main.edit_profile', id=profile.id) }}">
-                <button type="submit" class="btn btn-sm btn-info">Edit</button>
-              </form>
-              <form method="POST" action="{{ url_for('main.delete_profile', id=profile.id) }}">
+            <td class="d-flex">
+              <button
+                type="button"
+                class="btn btn-sm btn-info mx-1 edit-profile"
+                data-toggle="modal"
+                data-target="#editProfileModal"
+                data-id="{{ profile.id }}"
+                data-username="{{ profile.username }}"
+                data-email="{{ profile.email }}"
+                data-gender="{{ profile.gender }}"
+                data-role="{{ profile.role }}"
+              >
+                Edit
+              </button>
+              <form
+                method="POST"
+                action="{{ url_for('main.delete_profile', id=profile.id) }}"
+                style="display: inline"
+              >
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
             </td>
@@ -85,6 +47,67 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div
+  class="modal fade"
+  id="editProfileModal"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="editProfileModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form
+        id="editProfileForm"
+        method="POST"
+        enctype="multipart/form-data"
+        action="{{ url_for('main.edit_profile', id=profile.id) }}"
+      >
+        <div class="modal-body">
+          <input type="hidden" name="id" id="editProfileId" />
+          <div class="form-group">
+            <label for="edit-username">Username:</label>
+            <input type="text" name="username" class="form-control" id="edit-username" />
+          </div>
+          <div class="form-group">
+            <label for="edit-email">Email:</label>
+            <input type="email" name="email" class="form-control" id="edit-email" />
+          </div>
+          <div class="form-group">
+            <label for="edit-gender">Gender:</label>
+            <select name="gender" class="form-control" id="edit-gender">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-role">Role:</label>
+            <select name="role" class="form-control" id="edit-role">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-profile_image">Profile Image:</label>
+            <input type="file" name="profile_image" class="form-control-file" accept="image/*" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" name="submit_edit_profile">Save changes</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

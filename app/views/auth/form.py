@@ -14,3 +14,10 @@ class LoginForm(FlaskForm):
 class CategoryForm(FlaskForm):
     name = StringField('Category Name', validators=[DataRequired()], render_kw={'placeholder': 'Enter category'})
     submit = SubmitField('Submit')
+
+class ProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()], render_kw={'placeholder': 'Enter username'})
+    email = StringField('Email', validators=[DataRequired()], render_kw={'placeholder': 'Enter email'})
+    password = PasswordField('Password', widget=PasswordInput(hide_value=True), validators=[DataRequired()], render_kw={'placeholder': 'Enter password'})
+    gender = StringField('Gender', validators=[DataRequired()], render_kw={'placeholder': 'Enter gender'})
+    submit = SubmitField('Submit')
