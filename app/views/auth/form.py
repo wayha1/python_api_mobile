@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField ,TextAreaField, FileField
 from wtforms.validators import DataRequired
 from wtforms.widgets import PasswordInput
 
@@ -20,4 +20,14 @@ class ProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()], render_kw={'placeholder': 'Enter email'})
     password = PasswordField('Password', widget=PasswordInput(hide_value=True), validators=[DataRequired()], render_kw={'placeholder': 'Enter password'})
     gender = StringField('Gender', validators=[DataRequired()], render_kw={'placeholder': 'Enter gender'})
+    role = StringField('Role', validators=[DataRequired()], render_kw={'placeholder': 'Enter role'})
+    profile_image = StringField('Profile_Image', validators=[DataRequired()], render_kw={'placeholder': 'Enter image'})
+
+    submit = SubmitField('Submit')
+    
+class AuthorForm(FlaskForm):
+    author_name = StringField('Author Name', validators=[DataRequired()], render_kw={'placeholder': 'Enter author name'})
+    author_decs = TextAreaField('Author Description', validators=[DataRequired()], render_kw={'placeholder': 'Enter author description'})
+    gender = StringField('Gender', validators=[DataRequired()], render_kw={'placeholder': 'Enter gender'})
+    author_image = FileField('Author Image', validators=[DataRequired()])
     submit = SubmitField('Submit')

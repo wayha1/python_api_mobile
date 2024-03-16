@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.models import * 
 from app.extensions import db
 from cloudinary.uploader import upload
-from app.views.auth.form import CategoryForm, ProfileForm
+from app.views.auth.form import CategoryForm, ProfileForm,AuthorForm
 
 main = Blueprint('main', __name__)
 
@@ -58,7 +58,6 @@ def category():
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    username = current_user.username
     form = ProfileForm()
 
     if form.validate_on_submit():
@@ -89,54 +88,98 @@ def profile():
                     )
                 db.session.add(profile)
                 db.session.commit()
-                
-                profiles = Profile.query.all()  
-                
+
                 flash('Profile created/updated successfully', 'success')
                 return redirect(url_for('main.profile'))
             else:
                 flash('Invalid profile image file extension', 'error')
         except Exception as e:
             flash('Error creating/updating profile: {}'.format(str(e)), 'error')
-            
-    profiles = Profile.query.all()  
-    
-    return render_template('profile.html', form=form, username=username, profiles=profiles)
 
-@main.route('/profile/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit_profile(id):
-    profile = Profile.query.get_or_404(id)
-    form = ProfileForm(obj=profile)
-    if request.method == 'POST' and form.validate_on_submit():
-        try:
-            form.populate_obj(profile)
-            profile_image = request.files['profile_image']
-            if profile_image and allowed_file(profile_image.filename):
-                cloudinary_response = upload(profile_image)
-                profile.profile_image = cloudinary_response['secure_url']
-            db.session.commit()
-            flash('Profile updated successfully', 'success')
-            return redirect(url_for('main.profile'))
-        except Exception as e:
-            flash('Error updating profile: {}'.format(str(e)), 'error')
+    profiles = Profile.query.all()
 
-    return render_template('edit_profile.html', form=form, profile=profile)
+    # Handle edit operation
+    if request.method == 'POST':
+        if 'edit_profile' in request.form:
+            profile_id = request.form.get('profile_id')
+            new_username = request.form.get('new_username')
+            new_email = request.form.get('new_email')
+            new_gender = request.form.get('new_gender')
+            new_role = request.form.get('new_role')
+            new_profile_image = request.files.get('new_profile_image')
+
+            if new_profile_image and allowed_file(new_profile_image.filename):
+                cloudinary_response = upload(new_profile_image)
+                new_cloudinary_url = cloudinary_response['secure_url']
+
+                profile = Profile.query.get(profile_id)
+                if profile:
+                    profile.username = new_username
+                    profile.email = new_email
+                    profile.gender = new_gender
+                    profile.role = new_role
+                    profile.profile_image = new_cloudinary_url
+                    db.session.commit()
+                    flash('Profile updated successfully', 'success')
+                    return redirect(url_for('main.profile'))
+            else:
+                flash('Invalid profile image file extension', 'error')
+
+    return render_template('profile.html', form=form, profiles=profiles)
 
 @main.route('/profile/delete/<int:id>', methods=['POST'])
 @login_required
-def delete_profile(id):
+def delete_profile():
     profile = Profile.query.get_or_404(id)
     db.session.delete(profile)
     db.session.commit()
     flash('Profile deleted successfully', 'success')
     return redirect(url_for('main.profile'))
 
+
 @main.route('/author', methods=['GET', 'POST'])
 @login_required
 def author():
-    username = current_user.username
-    return render_template('author.html', username=username)
+    form = AuthorForm()
+    if form.validate_on_submit():
+        author_name = form.author_name.data
+        author_decs = form.author_decs.data
+        gender = form.gender.data
+        author_image = request.files['author_image']  # Access uploaded file
+        
+        # Upload image to Cloudinary
+        cloudinary_response = upload(author_image)
+        author_image_url = cloudinary_response['secure_url']
+
+        new_author = Author(author_name=author_name, author_decs=author_decs, gender=gender, author_image=author_image_url)
+        db.session.add(new_author)
+        db.session.commit()
+        flash('Author added successfully', 'success')
+        return redirect(url_for('main.author'))
+    
+    authors = Author.query.all()
+    return render_template('author.html', authors=authors, form=form)
+
+@main.route('/author/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_author(id):
+    author = Author.query.get_or_404(id)
+    form = AuthorForm(obj=author)
+    if form.validate_on_submit():
+        form.populate_obj(author)
+        db.session.commit()
+        flash('Author updated successfully', 'success')
+        return redirect(url_for('main.author'))
+    return render_template('edit_author.html', form=form, author=author)
+
+@main.route('/author/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_author(id):
+    author = Author.query.get_or_404(id)
+    db.session.delete(author)
+    db.session.commit()
+    flash('Author deleted successfully', 'success')
+    return redirect(url_for('main.author'))
 
 @main.route('/book', methods=['GET', 'POST'])
 @login_required

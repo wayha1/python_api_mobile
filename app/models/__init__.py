@@ -18,7 +18,7 @@ class Profile(db.Model):
     password_hash = db.Column(db.String, nullable=False)
     gender = db.Column(db.String(10))
     role = db.Column(db.String)
-    profile_image = db.Column(db.String,nullable=True)
+    profile_image = db.Column(db.String(255),nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', back_populates='profile')
