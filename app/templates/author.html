@@ -8,8 +8,9 @@
       </button>
       <table class="table">
         <!-- Table Headings -->
+        
         <thead>
-          <tr>
+          <tr class="shadow-sm m-2 table-bordered">
             <th>Name</th>
             <th>Description</th>
             <th>Gender</th>
@@ -26,7 +27,7 @@
             <td>
               <img src="{{ author.author_image }}" alt="{{ author.author_name }}" style="max-width: 100px" />
             </td>
-            <td>
+            <td class="d-flex">
               <a href="{{ url_for('main.edit_author', id=author.id) }}" class="btn btn-sm btn-info">Edit</a>
               <form
                 method="post"
@@ -34,7 +35,7 @@
                 style="display: inline"
               >
                 {{ form.csrf_token }}
-                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                <button type="submit" class="mx-1 btn btn-sm btn-danger">Delete</button>
               </form>
             </td>
           </tr>
