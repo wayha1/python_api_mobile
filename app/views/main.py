@@ -58,6 +58,7 @@ def category():
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
+    username = current_user.username
     form = ProfileForm()
 
     if form.validate_on_submit():
@@ -125,7 +126,7 @@ def profile():
             else:
                 flash('Invalid profile image file extension', 'error')
 
-    return render_template('profile.html', form=form, profiles=profiles)
+    return render_template('profile.html', form=form, profiles=profiles, username=username)
 
 @main.route('/profile/delete/<int:id>', methods=['POST'])
 @login_required
@@ -140,6 +141,7 @@ def delete_profile():
 @main.route('/author', methods=['GET', 'POST'])
 @login_required
 def author():
+    username= current_user.username
     form = AuthorForm()
     if form.validate_on_submit():
         author_name = form.author_name.data
@@ -158,7 +160,7 @@ def author():
         return redirect(url_for('main.author'))
     
     authors = Author.query.all()
-    return render_template('author.html', authors=authors, form=form)
+    return render_template('author.html', authors=authors, form=form, username=username)
 
 @main.route('/author/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

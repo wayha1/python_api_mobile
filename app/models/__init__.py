@@ -10,6 +10,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String)
     
     profile = db.relationship('Profile', back_populates='user')
+    payments = db.relationship('Payment', back_populates='user')
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,11 +47,11 @@ class Book(db.Model):
     price = db.Column(db.String(20), nullable=False, unique=True)
     publisher = db.Column(db.String(20), nullable=False, unique=True)
     
-    # Define the many-to-one relationship with back_populates
+    # Define the many-to-one relationship with Category
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))  
     category = db.relationship('Category', back_populates='books')
     
-    # Define the many-to-one relationship with back_populates
+    # Define the many-to-one relationship with Author
     author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship('Author', back_populates='books')
     
@@ -61,6 +62,9 @@ class Book(db.Model):
     # Define the one-to-one relationship for PDF
     pdf_id = db.Column(db.Integer, db.ForeignKey('pdf_model.id'))
     pdf = db.relationship('PDFModel', back_populates='book', uselist=False)
+    
+    # Define the relationship with Payment
+    payments = db.relationship('Payment', back_populates='book')
 
 class ImageModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +123,15 @@ class UserBook(db.Model):
 
 User.books = db.relationship('UserBook', back_populates='user')
 Book.users = db.relationship('UserBook', back_populates='book')
+
+class Payment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    price = db.Column(db.Float, nullable=False)
+
+    user = db.relationship('User', back_populates='payments')
+    book = db.relationship('Book', back_populates='payments')
 
 class AccessToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
