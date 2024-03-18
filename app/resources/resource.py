@@ -195,7 +195,6 @@ class CategoryAPI(Resource):
         db.session.commit()
         return {}, 204
 
-# Book Resource
 @ns_book.route("/book")
 class BookResource(Resource):
     @ns_book.doc(security="jsonWebToken")
@@ -220,6 +219,20 @@ class BookResource(Resource):
         if category is None:
             return abort(400, message="Category not found.")
 
+        # Upload image to Cloudinary if available
+        image_url = None
+        if 'image_file' in data:
+            image_file = data['image_file']
+            upload_result = upload(image_file)
+            image_url = upload_result['secure_url']
+
+        # Upload PDF to Cloudinary if available
+        pdf_url = None
+        if 'pdf_file' in data:
+            pdf_file = data['pdf_file']
+            upload_result = upload(pdf_file)
+            pdf_url = upload_result['secure_url']
+
         # Create a new book with the specified author, category, image, and pdf
         book = Book(
             title=data["title"],
@@ -227,34 +240,23 @@ class BookResource(Resource):
             price=data["price"],
             publisher=data['publisher'],
             category_id=data["category_id"],
-            author_id=data["author_id"]
+            author_id=data["author_id"],
+            image_url=image_url,
+            pdf_url=pdf_url
         )
-
-        # Add image if available
-        if 'image_id' in data:
-            image = ImageModel.query.get(data["image_id"])
-            if image:
-                book.image = image
-
-        # Add pdf if available
-        if 'pdf_id' in data:
-            pdf = PDFModel.query.get(data["pdf_id"])
-            if pdf:
-                book.pdf = pdf
 
         db.session.add(book)
         db.session.commit()
 
         return book, 201
 
-# Update and delete book by id
-@ns_book.route('/book/<int:id>') 
+@ns_book.route('/book/<int:id>')
 class BookAPI(Resource):
     @ns_book.doc(security="jsonWebToken")
     @ns_book.marshal_with(book_model)
     def get(self, id):
-        # Include the 'author' relationship in the query to fetch author information
-        book = Book.query.options(db.joinedload('author')).get(id)
+        # Include the 'author' and 'category' relationships in the query to fetch author and category information
+        book = Book.query.options(db.joinedload('author'), db.joinedload('category')).get(id)
         if book is None:
             return abort(404, message="Book not found.")
         return book
@@ -267,28 +269,41 @@ class BookAPI(Resource):
         book = Book.query.get(id)
 
         if book is None:
-            # If the book does not exist, create a new one
-            book = Book(
-                title=data["title"],
-                description=data["description"],
-                price=data["price"],
-                publisher=data['publisher'],
-                category_id=data["category_id"],
-                author_id=data["author_id"]
-            )
-            db.session.add(book)
-        else:
-            # If the book exists, update its fields
-            book.title = data.get("title", book.title)
-            book.description = data.get("description", book.description)
-            book.price = data.get("price", book.price)
-            book.publisher = data.get("publisher", book.publisher)
-            book.category_id = data.get("category_id", book.category_id)
-            book.author_id = data.get("author_id", book.author_id)
+            return abort(404, message="Book not found.")
+
+        # Check if the provided author_id exists
+        author = Author.query.get(data["author_id"])
+        if author is None:
+            return abort(400, message="Author not found.")
+
+        # Check if the provided category_id exists
+        category = Category.query.get(data["category_id"])
+        if category is None:
+            return abort(400, message="Category not found.")
+
+        # Update book fields
+        book.title = data.get("title", book.title)
+        book.description = data.get("description", book.description)
+        book.price = data.get("price", book.price)
+        book.publisher = data.get("publisher", book.publisher)
+        book.category_id = data.get("category_id", book.category_id)
+        book.author_id = data.get("author_id", book.author_id)
+
+        # Update image if available
+        if 'image_file' in data:
+            image_file = data['image_file']
+            upload_result = upload(image_file)
+            book.image_url = upload_result['secure_url']
+
+        # Update PDF if available
+        if 'pdf_file' in data:
+            pdf_file = data['pdf_file']
+            upload_result = upload(pdf_file)
+            book.pdf_url = upload_result['secure_url']
 
         db.session.commit()
         return book
-    
+
     @ns_book.doc(security="jsonWebToken")
     def delete(self, id):
         book = Book.query.get(id)
@@ -298,7 +313,6 @@ class BookAPI(Resource):
         db.session.delete(book)
         db.session.commit()
         return {}, 204
-
 @ns_author.route('/author')
 class AuthorAPIList(Resource):
     @ns_author.doc(security="jsonWebToken")

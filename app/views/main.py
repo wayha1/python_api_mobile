@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.models import * 
 from app.extensions import db
 from cloudinary.uploader import upload
-from app.views.auth.form import CategoryForm, ProfileForm,AuthorForm
+from app.views.auth.form import *
 
 main = Blueprint('main', __name__)
 
@@ -99,7 +99,6 @@ def profile():
 
     profiles = Profile.query.all()
 
-    # Handle edit operation
     if request.method == 'POST':
         if 'edit_profile' in request.form:
             profile_id = request.form.get('profile_id')
@@ -137,7 +136,6 @@ def delete_profile():
     flash('Profile deleted successfully', 'success')
     return redirect(url_for('main.profile'))
 
-
 @main.route('/author', methods=['GET', 'POST'])
 @login_required
 def author():
@@ -147,16 +145,19 @@ def author():
         author_name = form.author_name.data
         author_decs = form.author_decs.data
         gender = form.gender.data
-        author_image = request.files['author_image']  # Access uploaded file
+        author_image = request.files['author_image'] 
         
         # Upload image to Cloudinary
         cloudinary_response = upload(author_image)
         author_image_url = cloudinary_response['secure_url']
 
-        new_author = Author(author_name=author_name, author_decs=author_decs, gender=gender, author_image=author_image_url)
+        new_author = Author(author_name=author_name,
+                            author_decs=author_decs,
+                            gender=gender, 
+                            author_image=author_image_url)
         db.session.add(new_author)
         db.session.commit()
-        flash('Author added successfully', 'success')
+        print('Author added successfully', 'success')
         return redirect(url_for('main.author'))
     
     authors = Author.query.all()
@@ -187,26 +188,82 @@ def delete_author(id):
 @login_required
 def book():
     username = current_user.username
-    if request.method == 'POST':
-        try:
-            file = request.files['file']
+    form = BookForm()
+    if form.validate_on_submit():
+        # Retrieve form data
+        title = form.title.data
+        description = form.description.data
+        price = form.price.data
+        publisher = form.publisher.data
+        author_id = form.author.data
+        category_id = form.category.data
+        image_file = form.image.data 
+        book_file = form.file.data
+        print(title, description, category_id)
+        
+        # Check if all required fields are present
+        if title and description and price and publisher and author_id and category_id and image_file and book_file:
+            # Handle file uploads (image and book file)
+            if allowed_file(image_file.filename) and allowed_file(book_file.filename):
+                # Upload files to Cloudinary
+                cloudinary_response_image = upload(image_file)
+                image_url = cloudinary_response_image['secure_url']
+                cloudinary_response_book = upload(book_file)
+                book_url = cloudinary_response_book['secure_url']
 
-            if file and allowed_file(file.filename):
-                cloudinary_response = upload(file)
-                cloudinary_url = cloudinary_response['secure_url']
-
-                image = ImageModel(file_path=cloudinary_url)
-                db.session.add(image)
+                # Create a new book entry
+                new_book = Book(
+                    title=title,
+                    description=description,
+                    price=price,
+                    publisher=publisher,
+                    
+                    category_id=category_id,
+                    author_id=author_id,
+                    image_id=image_url,
+                    pdf_id=book_url,
+                )
+                print(new_book)
+                db.session.add(new_book)
                 db.session.commit()
 
-                return redirect(url_for('main.home'))
+                flash('Book added successfully', 'success')
+                return redirect(url_for('main.book')) 
             else:
-                flash('Invalid file extension', 'error')
-        except Exception as e:
-            flash('Error uploading the image: {}'.format(str(e)), 'error')
+                flash('Invalid file extension for image or book file', 'error')
+        else:
+            flash('Please fill in all the required fields', 'error')
 
-    images = ImageModel.query.all()
-    return render_template('book.html', images=images,username=username)
+    books = Book.query.all()
+    print(books)
+    authors = Author.query.all()
+    categories = Category.query.all()
+    
+    # Pass the form instance to the template context
+    return render_template('book.html', form=form, books=books, authors=authors, categories=categories, username=username)
+
+
+@main.route('/book/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_book(id):
+    book = Book.query.get_or_404(id)
+    form = BookForm(obj=book)
+    if form.validate_on_submit():
+        form.populate_obj(book)
+        db.session.commit()
+        flash('Book updated successfully', 'success')
+        return redirect(url_for('main.book'))
+    return render_template('edit_book.html', form=form, book=book)
+
+
+@main.route('/book/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_book(id):
+    book = Book.query.get_or_404(id)
+    db.session.delete(book)
+    db.session.commit()
+    flash('Book deleted successfully', 'success')
+    return redirect(url_for('main.book'))
 
 @main.route('/dashboard')
 @login_required

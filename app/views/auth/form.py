@@ -1,7 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField ,TextAreaField, FileField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField ,TextAreaField, FileField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.widgets import PasswordInput
+from flask_wtf.file import FileField, FileAllowed
+from app.models import Author, Category
+
 
 class LoginForm(FlaskForm):
     username = StringField('Username', [DataRequired()], render_kw={'placeholder': 'username'})
@@ -31,3 +34,21 @@ class AuthorForm(FlaskForm):
     gender = StringField('Gender', validators=[DataRequired()], render_kw={'placeholder': 'Enter gender'})
     author_image = FileField('Author Image', validators=[DataRequired()])
     submit = SubmitField('Submit')
+    
+class BookForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    price = StringField('Price', validators=[DataRequired()])
+    publisher = StringField('Publisher', validators=[DataRequired()])
+    author = SelectField('Author', coerce=int, validators=[DataRequired()])
+    category = SelectField('Category', coerce=int, validators=[DataRequired()])
+    image = FileField('Upload Book Image')
+    file = FileField('Upload Book File (PDF)')
+    submit = SubmitField('Add Book')
+
+    def __init__(self, *args, **kwargs):
+        super(BookForm, self).__init__(*args, **kwargs)
+        # Populate choices for author field
+        self.author.choices = [(author.id, author.author_name) for author in Author.query.all()]
+        # Populate choices for category field
+        self.category.choices = [(category.id, category.name) for category in Category.query.all()]
