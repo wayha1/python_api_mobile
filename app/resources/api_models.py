@@ -41,6 +41,21 @@ profile_input_model = api.model("ProfileInputModel", {
     "profile_image": fields.String
 })
 
+author_model = api.model("AuthorModel", {
+    "id": fields.Integer,
+    "author_name": fields.String,
+    "author_decs": fields.String,
+    "gender": fields.String,
+    "author_image": fields.String(attribute=lambda x: x.author_image)
+})
+
+author_input_model = api.model("AuthorInputModel", {
+    "author_name": fields.String,
+    "author_decs": fields.String,
+    "gender": fields.String,
+    "author_image": fields.String
+})
+
 category_model = api.model("CategoryModel", {
     "id": fields.Integer,
     "name": fields.String,
@@ -58,8 +73,8 @@ book_model = api.model("BookModel", {
     "publisher": fields.String,
     "category_id": fields.Integer,
     "author_id": fields.Integer,
-    "image_id": fields.Integer,
-    "pdf_id": fields.Integer
+    "book_image": fields.String,
+    "book_pdf": fields.String
 })
 
 book_input_model = api.model("BookInputModel", {
@@ -69,39 +84,36 @@ book_input_model = api.model("BookInputModel", {
     "publisher": fields.String,
     "category_id": fields.Integer(required=True),
     "author_id": fields.Integer(required=True),
-    "image_id": fields.Integer,
-    "pdf_id": fields.Integer
+    "book_image": fields.String,
+    "book_pdf": fields.String
 })
 
-author_model = api.model("AuthorModel", {
-    "id": fields.Integer,
-    "author_name": fields.String,
-    "author_decs": fields.String,
-    "gender": fields.String,
-    "author_image": fields.String(attribute=lambda x: x.author_image)
+payment_model = api.model("PaymentModel", {
+    "id" : fields.Integer,
+    "user_id" : fields.Integer,
+    "book_id" : fields.Integer,
+    "price" : fields.Float
+})
+payment_input_model = api.model("PaymentInputModel", {
+    "user_id" : fields.Integer,
+    "book_id" : fields.Integer,
+    "price" : fields.Float
 })
 
-author_input_model = api.model("AuthorInputModel", {
-    "author_name": fields.String,
-    "author_decs": fields.String,
-    "gender": fields.String,
-    "author_image": fields.String
-})
+# image_model = api.model("ImageModel", {
+#     "id": fields.Integer,
+#     "file_path": fields.String
+# })
 
-image_model = api.model("ImageModel", {
-    "id": fields.Integer,
-    "file_path": fields.String
-})
+# image_input_model = api.model("ImageInputModel", {
+#     "file_path": fields.String(required=True)
+# })
 
-image_input_model = api.model("ImageInputModel", {
-    "file_path": fields.String(required=True)
-})
+# pdf_model = api.model("PDFModel", {
+#     "id": fields.Integer,
+#     "file_path": fields.String
+# })
 
-pdf_model = api.model("PDFModel", {
-    "id": fields.Integer,
-    "file_path": fields.String
-})
-
-pdf_input_model = api.model("PDFInputModel", {
-    "file_path": fields.String(required=True)
-})
+# pdf_input_model = api.model("PDFInputModel", {
+#     "file_path": fields.String(required=True)
+# })

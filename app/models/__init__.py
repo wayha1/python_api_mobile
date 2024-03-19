@@ -42,10 +42,12 @@ class Category(db.Model):
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), nullable=False, unique=True)
-    description = db.Column(db.String(200), nullable=False, unique=True)
-    price = db.Column(db.String(20), nullable=False, unique=True)
-    publisher = db.Column(db.String(20), nullable=False, unique=True)
+    title = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(200), nullable=False)
+    price = db.Column(db.String(20), nullable=False)
+    publisher = db.Column(db.String(20), nullable=False)
+    book_image = db.Column(db.String(255), nullable=False)
+    book_pdf = db.Column(db.String(255), nullable=False)
     
     # Define the many-to-one relationship with Category
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))  
@@ -55,30 +57,30 @@ class Book(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('author.id'))
     author = db.relationship('Author', back_populates='books')
     
-    # Define the one-to-one relationship for Image
-    image_id = db.Column(db.Integer, db.ForeignKey('image_model.id'))
-    image = db.relationship('ImageModel', back_populates='book', uselist=False)
+    # # Define the one-to-one relationship for Image
+    # image_id = db.Column(db.Integer, db.ForeignKey('image_model.id'))
+    # image = db.relationship('ImageModel', back_populates='book', uselist=False)
 
-    # Define the one-to-one relationship for PDF
-    pdf_id = db.Column(db.Integer, db.ForeignKey('pdf_model.id'))
-    pdf = db.relationship('PDFModel', back_populates='book', uselist=False)
+    # # Define the one-to-one relationship for PDF
+    # pdf_id = db.Column(db.Integer, db.ForeignKey('pdf_model.id'))
+    # pdf = db.relationship('PDFModel', back_populates='book', uselist=False)
     
     # Define the relationship with Payment
     payments = db.relationship('Payment', back_populates='book')
 
-class ImageModel(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    file_path = db.Column(db.String(255), nullable=False)
+# class ImageModel(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     file_path = db.Column(db.String(255), nullable=False)
 
-    # Define the one-to-one relationship with back_populates
-    book = db.relationship('Book', back_populates='image', uselist=False)
+#     # Define the one-to-one relationship with back_populates
+#     book = db.relationship('Book', back_populates='image', uselist=False)
 
-class PDFModel(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    file_path = db.Column(db.String(255), nullable=False)
+# class PDFModel(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     file_path = db.Column(db.String(255), nullable=False)
 
-    # Define the one-to-one relationship with back_populates
-    book = db.relationship('Book', back_populates='pdf', uselist=False)    
+#     # Define the one-to-one relationship with back_populates
+#     book = db.relationship('Book', back_populates='pdf', uselist=False)    
     
 class BookAuthor(db.Model):
     __tablename__ = 'book_author'
@@ -129,14 +131,8 @@ class Payment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
     price = db.Column(db.Float, nullable=False)
-
+    # relationship 
     user = db.relationship('User', back_populates='payments')
     book = db.relationship('Book', back_populates='payments')
 
-class AccessToken(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    token = db.Column(db.String(256), unique=True, nullable=False)
 
-    def repr(self):
-        return f"<AccessToken {self.id}>"

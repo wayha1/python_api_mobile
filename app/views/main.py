@@ -11,6 +11,54 @@ main = Blueprint('main', __name__)
 def index():
     return render_template('index.html')
 
+@main.route('/author', methods=['GET', 'POST'])
+@login_required
+def author():
+    username= current_user.username
+    form = AuthorForm()
+    if form.validate_on_submit():
+        author_name = form.author_name.data
+        author_decs = form.author_decs.data
+        gender = form.gender.data
+        author_image = request.files['author_image'] 
+        
+        # Upload image to Cloudinary
+        cloudinary_response = upload(author_image)
+        author_image_url = cloudinary_response['secure_url']
+
+        new_author = Author(author_name=author_name,
+                            author_decs=author_decs,
+                            gender=gender, 
+                            author_image=author_image_url)
+        db.session.add(new_author)
+        db.session.commit()
+        print('Author added successfully', 'success')
+        return redirect(url_for('main.author'))
+    
+    authors = Author.query.all()
+    return render_template('author.html', authors=authors, form=form, username=username)
+
+@main.route('/author/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_author(id):
+    author = Author.query.get_or_404(id)
+    form = AuthorForm(obj=author)
+    if form.validate_on_submit():
+        form.populate_obj(author)
+        db.session.commit()
+        flash('Author updated successfully', 'success')
+        return redirect(url_for('main.author'))
+    return render_template('edit_author.html', form=form, author=author)
+
+@main.route('/author/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_author(id):
+    author = Author.query.get_or_404(id)
+    db.session.delete(author)
+    db.session.commit()
+    flash('Author deleted successfully', 'success')
+    return redirect(url_for('main.author'))
+
 @main.route('/category', methods=['GET', 'POST'])
 @login_required
 def category():
@@ -136,53 +184,6 @@ def delete_profile():
     flash('Profile deleted successfully', 'success')
     return redirect(url_for('main.profile'))
 
-@main.route('/author', methods=['GET', 'POST'])
-@login_required
-def author():
-    username= current_user.username
-    form = AuthorForm()
-    if form.validate_on_submit():
-        author_name = form.author_name.data
-        author_decs = form.author_decs.data
-        gender = form.gender.data
-        author_image = request.files['author_image'] 
-        
-        # Upload image to Cloudinary
-        cloudinary_response = upload(author_image)
-        author_image_url = cloudinary_response['secure_url']
-
-        new_author = Author(author_name=author_name,
-                            author_decs=author_decs,
-                            gender=gender, 
-                            author_image=author_image_url)
-        db.session.add(new_author)
-        db.session.commit()
-        print('Author added successfully', 'success')
-        return redirect(url_for('main.author'))
-    
-    authors = Author.query.all()
-    return render_template('author.html', authors=authors, form=form, username=username)
-
-@main.route('/author/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit_author(id):
-    author = Author.query.get_or_404(id)
-    form = AuthorForm(obj=author)
-    if form.validate_on_submit():
-        form.populate_obj(author)
-        db.session.commit()
-        flash('Author updated successfully', 'success')
-        return redirect(url_for('main.author'))
-    return render_template('edit_author.html', form=form, author=author)
-
-@main.route('/author/delete/<int:id>', methods=['POST'])
-@login_required
-def delete_author(id):
-    author = Author.query.get_or_404(id)
-    db.session.delete(author)
-    db.session.commit()
-    flash('Author deleted successfully', 'success')
-    return redirect(url_for('main.author'))
 
 @main.route('/book', methods=['GET', 'POST'])
 @login_required
@@ -197,18 +198,18 @@ def book():
         publisher = form.publisher.data
         author_id = form.author.data
         category_id = form.category.data
-        image_file = form.image.data 
-        book_file = form.file.data
-        print(title, description, category_id)
-        
+        book_image = form.image.data 
+        book_pdf = form.file.data
+                
         # Check if all required fields are present
-        if title and description and price and publisher and author_id and category_id and image_file and book_file:
+        if title and description and price and publisher and author_id and category_id and book_image and book_pdf:
             # Handle file uploads (image and book file)
-            if allowed_file(image_file.filename) and allowed_file(book_file.filename):
+            if allowed_file(book_image.filename) and allowed_file(book_pdf.filename):
                 # Upload files to Cloudinary
-                cloudinary_response_image = upload(image_file)
+                cloudinary_response_image = upload(book_image)
                 image_url = cloudinary_response_image['secure_url']
-                cloudinary_response_book = upload(book_file)
+                
+                cloudinary_response_book = upload(book_pdf)
                 book_url = cloudinary_response_book['secure_url']
 
                 # Create a new book entry
@@ -217,14 +218,16 @@ def book():
                     description=description,
                     price=price,
                     publisher=publisher,
-                    
                     category_id=category_id,
                     author_id=author_id,
-                    image_id=image_url,
-                    pdf_id=book_url,
+                    book_image=image_url,
+                    book_pdf=book_url
                 )
+                
                 print(new_book)
+                # Add the new book to the database session
                 db.session.add(new_book)
+                # Commit changes to the database
                 db.session.commit()
 
                 flash('Book added successfully', 'success')
@@ -235,11 +238,9 @@ def book():
             flash('Please fill in all the required fields', 'error')
 
     books = Book.query.all()
-    print(books)
     authors = Author.query.all()
     categories = Category.query.all()
     
-    # Pass the form instance to the template context
     return render_template('book.html', form=form, books=books, authors=authors, categories=categories, username=username)
 
 
@@ -273,5 +274,5 @@ def dashboard():
 
     
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif', 'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

@@ -14,6 +14,8 @@
       <th>Publisher</th>
       <th>Category</th>
       <th>Author</th>
+      <th>Pdf Book</th>
+      <th>Pdf Image</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -27,6 +29,10 @@
       <td>{{ book.publisher }}</td>
       <td>{{ book.category.name }}</td>
       <td>{{ book.author.author_name }}</td>
+      <td>
+        <img src="{{ book.book_image }}" alt="{{ book.book_image }}" style="max-width: 100px" />
+      </td>
+      
       <td>
         <form action="{{ url_for('main.delete_book', id=book.id) }}" method="post">
           <button type="submit" class="btn btn-danger">Delete</button>
@@ -65,7 +71,7 @@
           <div class="form-group">
             {{ form.title.label }} {{ form.title(class="form-control", id="title") }}
           </div>
-          <div class="form-group">
+          <div class="form-group row">
             {{ form.description.label }} {{ form.description(class="form-control", id="description") }}
           </div>
           <div class="form-group">
