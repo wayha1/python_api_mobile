@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField ,TextAreaField, FileField, SelectField
 from wtforms.validators import DataRequired
 from wtforms.widgets import PasswordInput
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed,FileRequired
 from app.models import Author, Category
 
 
@@ -42,8 +42,8 @@ class BookForm(FlaskForm):
     publisher = StringField('Publisher', validators=[DataRequired()])
     author = SelectField('Author', coerce=int, validators=[DataRequired()])
     category = SelectField('Category', coerce=int, validators=[DataRequired()])
-    image = FileField('Upload Book Image')
-    file = FileField('Upload Book File (PDF)')
+    image = FileField('Upload Book Image', validators=[FileAllowed(['jpg', 'png', 'jpeg', 'gif'])])
+    file = FileField('Upload Book File (PDF)', validators=[FileRequired(), FileAllowed(['pdf'])])  # Ensure PDF file is required and allowed
     submit = SubmitField('Add Book')
 
     def __init__(self, *args, **kwargs):

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask , jsonify, render_template
 from flask_cors import CORS
 from .config import Config
 from .extensions import api, db, jwt, login_manager
@@ -40,5 +40,36 @@ def create_app():
     def user_lookup_callback(_jwt_header, jwt_data):
         identity = jwt_data["sub"]
         return User.query.filter_by(username=identity).one_or_none()
+    
+    #additional claims
+    @jwt.additional_claims_loader
+    def make_addition_claims(identity):
+        
+        if identity == "admin":
+            return {"is_user": True}
+        return {"is_user": False}
+    
+    #jwt error handler
+    @jwt.expired_token_loader
+    def expires_token_callback(jwt_header, jwt_data):
+        return jsonify({
+                        "message": "Token has expired",
+                        "error" : "token_expire"
+                        }), 401
+        
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return jsonify({
+                        "message": "Signature verification failed",
+                        "error" : "invalid_token"
+                        }), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return jsonify({
+                        "message": "Request doesn't contain valid token",
+                        "error" : "authorization_header"
+                        }), 401
+        
 
     return app

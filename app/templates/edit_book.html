@@ -1,47 +1,34 @@
-{% extends 'base.html' %} {% block content %}
-<form id="uploadForm" action="{{ url_for('main.book') }}" method="POST" enctype="multipart/form-data">
-  <div class="form-group">
-    <label for="titleInput">Title</label>
-    <input type="text" class="form-control" name="title" id="titleInput" />
-  </div>
-  <div class="form-group">
-    <label for="descriptionInput">Description</label>
-    <textarea class="form-control" name="description" id="descriptionInput" rows="3"></textarea>
-  </div>
-  <div class="form-group">
-    <label for="priceInput">Price</label>
-    <input type="text" class="form-control" name="price" id="priceInput" />
-  </div>
-  <div class="form-group">
-    <label for="publisherInput">Publisher</label>
-    <input type="text" class="form-control" name="publisher" id="publisherInput" />
-  </div>
-  <div class="form-group">
-    <label for="authorSelect">Author</label>
-    <select class="form-control" name="author" id="authorSelect">
-      {% for author in authors %}
-      <option value="{{ author.id }}">{{ author.author_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="fileInput">Upload Book File</label>
-    <input type="file" class="form-control-file" name="file" id="fileInput" />
-  </div>
-  <div class="form-group">
-    <label for="categorySelect">Category</label>
-    <select class="form-control" name="category" id="categorySelect">
-      {% for category in categories %}
-      <option value="{{ category.id }}">{{ category.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Upload Book</button>
-</form>
-<div id="response">
-  <!-- Use Bootstrap grid and card components for image display -->
-  <div class="container">
-    <div class="row" id="imageContainer"></div>
+{% extends "base.html" %} 
+{% block title %}Edit Book{% endblock %} 
+{% block content %}
+<div class="container">
+  <h2 class="text-center mt-4 mb-3">Edit Book</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('main.edit_book', id=book.id) }}">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.title.label(class="form-label") }} {{ form.title(class="form-control", value=book.title) }}
+        </div>
+        <div class="form-group">
+          {{ form.description.label(class="form-label") }} {{ form.description(class="form-control", value=book.description) }}
+        </div>
+        <div class="form-group">
+          {{ form.price.label(class="form-label") }} {{ form.price(class="form-control", value=book.price) }}
+        </div>
+        <div class="form-group">
+          {{ form.publisher.label(class="form-label") }} {{ form.publisher(class="form-control", value=book.publisher) }}
+        </div>
+        <div class="form-group">
+          {{ form.author.label(class="form-label") }} {{ form.author(class="form-control", value=book.author_id) }}
+        </div>
+        <div class="form-group">
+          {{ form.category.label(class="form-label") }} {{ form.category(class="form-control", value=book.category_id) }}
+        </div>
+       
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

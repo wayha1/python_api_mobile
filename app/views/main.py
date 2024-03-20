@@ -14,13 +14,13 @@ def index():
 @main.route('/author', methods=['GET', 'POST'])
 @login_required
 def author():
-    username= current_user.username
+    username = current_user.username
     form = AuthorForm()
     if form.validate_on_submit():
         author_name = form.author_name.data
         author_decs = form.author_decs.data
         gender = form.gender.data
-        author_image = request.files['author_image'] 
+        author_image = form.author_image.data
         
         # Upload image to Cloudinary
         cloudinary_response = upload(author_image)
@@ -32,7 +32,7 @@ def author():
                             author_image=author_image_url)
         db.session.add(new_author)
         db.session.commit()
-        print('Author added successfully', 'success')
+        flash('Author added successfully', 'success')
         return redirect(url_for('main.author'))
     
     authors = Author.query.all()
@@ -45,6 +45,13 @@ def edit_author(id):
     form = AuthorForm(obj=author)
     if form.validate_on_submit():
         form.populate_obj(author)
+        
+        # Check if a new image is uploaded
+        if 'author_image' in request.files:
+            author_image = form.author_image.data
+            cloudinary_response = upload(author_image)
+            author.author_image = cloudinary_response['secure_url']
+        
         db.session.commit()
         flash('Author updated successfully', 'success')
         return redirect(url_for('main.author'))
@@ -205,12 +212,13 @@ def book():
         if title and description and price and publisher and author_id and category_id and book_image and book_pdf:
             # Handle file uploads (image and book file)
             if allowed_file(book_image.filename) and allowed_file(book_pdf.filename):
-                # Upload files to Cloudinary
+                # Upload image to Cloudinary
                 cloudinary_response_image = upload(book_image)
                 image_url = cloudinary_response_image['secure_url']
                 
-                cloudinary_response_book = upload(book_pdf)
-                book_url = cloudinary_response_book['secure_url']
+                # Upload PDF to Cloudinary
+                cloudinary_response_pdf = upload(book_pdf)
+                pdf_url = cloudinary_response_pdf['secure_url']
 
                 # Create a new book entry
                 new_book = Book(
@@ -221,10 +229,9 @@ def book():
                     category_id=category_id,
                     author_id=author_id,
                     book_image=image_url,
-                    book_pdf=book_url
+                    book_pdf=pdf_url  # Store PDF URL in the database
                 )
                 
-                print(new_book)
                 # Add the new book to the database session
                 db.session.add(new_book)
                 # Commit changes to the database
@@ -243,7 +250,6 @@ def book():
     
     return render_template('book.html', form=form, books=books, authors=authors, categories=categories, username=username)
 
-
 @main.route('/book/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_book(id):
@@ -255,7 +261,6 @@ def edit_book(id):
         flash('Book updated successfully', 'success')
         return redirect(url_for('main.book'))
     return render_template('edit_book.html', form=form, book=book)
-
 
 @main.route('/book/delete/<int:id>', methods=['POST'])
 @login_required
@@ -273,6 +278,7 @@ def dashboard():
     return render_template('dashboard.html', username=username)
 
     
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif', 'pdf'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS

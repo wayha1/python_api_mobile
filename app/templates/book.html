@@ -1,4 +1,21 @@
 {% extends 'base.html' %} {% block content %}
+<style>
+  .truncate-3-lines {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* number of lines to show */
+    -webkit-box-orient: vertical;
+  }
+  
+  .pdf-link {
+    max-width: 100px; /* Adjust the max-width as needed */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>
+
 <h1>Books</h1>
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addBookModal">
   Add Book
@@ -14,8 +31,8 @@
       <th>Publisher</th>
       <th>Category</th>
       <th>Author</th>
-      <th>Pdf Book</th>
-      <th>Pdf Image</th>
+      <th>Book PDF</th>
+      <th>Book Image</th>
       <th>Actions</th>
     </tr>
   </thead>
@@ -24,16 +41,21 @@
     <tr>
       <td>{{ book.id }}</td>
       <td>{{ book.title }}</td>
-      <td>{{ book.description }}</td>
+      <td class="truncate-3-lines">{{ book.description }}</td>
       <td>{{ book.price }}</td>
       <td>{{ book.publisher }}</td>
       <td>{{ book.category.name }}</td>
       <td>{{ book.author.author_name }}</td>
-      <td>
-        <img src="{{ book.book_image }}" alt="{{ book.book_image }}" style="max-width: 100px" />
+      <td class="pdf-link">
+        <a href="{{ book.book_pdf }}">{{ book.book_pdf }}</a>
       </td>
-      
       <td>
+        <img src="{{ book.book_image }}" alt="{{ book.book_image }}" style="max-width: 100px">
+      </td>
+      <td class="d-flex"> 
+        <form action="{{ url_for('main.edit_book', id=book.id) }}" method="get">
+          <button type="submit" class="btn btn-primary mr-1">Edit</button>
+        </form>
         <form action="{{ url_for('main.delete_book', id=book.id) }}" method="post">
           <button type="submit" class="btn btn-danger">Delete</button>
         </form>
@@ -71,7 +93,7 @@
           <div class="form-group">
             {{ form.title.label }} {{ form.title(class="form-control", id="title") }}
           </div>
-          <div class="form-group row">
+          <div class="">
             {{ form.description.label }} {{ form.description(class="form-control", id="description") }}
           </div>
           <div class="form-group">
