@@ -9,27 +9,43 @@ ns_events = Namespace('events' , authorizations=authorizations)
 
 ns_events.decorators = [jwt_required()]
 
-@ns_events.route('/cart',)
+@ns_events.route('/cart')
 class EventListAPI(Resource):
     @ns_events.doc(security= "jsonWebToken")
-    @ns_events.marshal_list_with(payment_model)
+    @ns_events.marshal_list_with(cart_model)
     @jwt_required()
     def get(self):
         payments = Cart.query.all()
-        return payments
+        return payments, 200
     
     @ns_events.doc(security= "jsonWebTOken")
-    @ns_events.expect(payment_input_model)
-    @ns_events.marshal_with(payment_model)
+    @ns_events.expect(cart_model_input)
+    @ns_events.marshal_with(cart_model)
     def post(self):
         addCart = ns_events.payload
+        
+        # Check if 'user_id' is present in the payload
+        if 'user_id' not in addCart:
+            return {'message': 'Missing user_id in request payload'}, 400
+        
+        # Extract 'user_id', 'book_id', and 'quantity' from the payload
+        user_id = addCart.get('user_id')
+        book_id = addCart.get('book_id')
+        quantity = addCart.get('quantity')
+        
+        # Check if any of the required fields are missing
+        if user_id is None or book_id is None or quantity is None:
+            return {'message': 'Missing required fields in request payload'}, 400
+        
+        # Create and add the cart item to the database
         cart = Cart(
-            user_id = addCart["user_id"],
-            book_id = addCart["book_id"],
-            quantity = addCart["quantity"]
+            user_id=user_id,
+            book_id=book_id,
+            quantity=quantity
         )
         db.session.add(cart)
         db.session.commit()
+        
         return cart, 201
 
 @ns_events.route('/cart/<int:id>')
@@ -40,7 +56,7 @@ class EventAPI(Resource):
         cart = Cart.query.get(id)
         if not cart:
             abort(404, message="Cart item not found")
-        return cart
+        return cart, 200
     
     @ns_events.doc(security="jsonWebToken")
     @ns_events.expect(cart_model_input)
@@ -54,7 +70,7 @@ class EventAPI(Resource):
         cart.book_id = cart_data.get("book_id", cart.book_id)
         cart.quantity = cart_data.get("quantity", cart.quantity)
         db.session.commit()
-        return cart
+        return cart, 200
 
     @ns_events.doc(security="jsonWebToken")
     def delete(self, id):
