@@ -10,8 +10,8 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String)
     
     profile = db.relationship('Profile', back_populates='user')
-    payments = db.relationship('Payment', back_populates='user')
-
+    user_payments = db.relationship('Payment', back_populates='user')
+    
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
@@ -66,7 +66,7 @@ class Book(db.Model):
     # pdf = db.relationship('PDFModel', back_populates='book', uselist=False)
     
     # Define the relationship with Payment
-    payments = db.relationship('Payment', back_populates='book')
+    book_payments = db.relationship('Payment', back_populates='book')
 
 # class ImageModel(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -96,7 +96,6 @@ class BookAuthor(db.Model):
 Author.books_association = db.relationship('BookAuthor', back_populates='author')
 Book.authors_association = db.relationship('BookAuthor', back_populates='book')
 
-    
 class Cart(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -128,11 +127,16 @@ Book.users = db.relationship('UserBook', back_populates='book')
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    card_number = db.Column(db.String(16), nullable=False)
+    card_holder_name = db.Column(db.String(100), nullable=False)
+    expiration_date = db.Column(db.String(5), nullable=False)
+    cvv = db.Column(db.String(3), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    # relationship 
-    user = db.relationship('User', back_populates='payments')
-    book = db.relationship('Book', back_populates='payments')
+    
+     # Define the relationship with User and Book
+    user = db.relationship('User', back_populates='user_payments')
+    book = db.relationship('Book', back_populates='book_payments')
 
 

@@ -1,10 +1,11 @@
-from flask_restx import fields
+from flask_restx import fields, reqparse
 from app.extensions import *
 
 login_model = api.model("LoginModel", {
     "username": fields.String,
     "password": fields.String
 })
+
 register_model = api.model("RegisterModel",{
     "username": fields.String,
     "email": fields.String,
@@ -29,7 +30,7 @@ profile_model = api.model("ProfileModel", {
     "password_hash": fields.String,
     "gender": fields.String,
     "role": fields.String,
-    "profile_image": fields.String(attribute=lambda x: x.profile_image)
+    "profile_image": fields.String,
 })
 
 profile_input_model = api.model("ProfileInputModel", {
@@ -38,7 +39,7 @@ profile_input_model = api.model("ProfileInputModel", {
     "password_hash": fields.String,
     "gender": fields.String(required=True),
     "role": fields.String(required=True),
-    "profile_image": fields.String
+    "profile_image": fields.String,
 })
 
 author_model = api.model("AuthorModel", {
@@ -46,14 +47,14 @@ author_model = api.model("AuthorModel", {
     "author_name": fields.String,
     "author_decs": fields.String,
     "gender": fields.String,
-    "author_image": fields.String(attribute=lambda x: x.author_image)
+    "author_image": fields.String,
 })
 
 author_input_model = api.model("AuthorInputModel", {
     "author_name": fields.String,
     "author_decs": fields.String,
     "gender": fields.String,
-    "author_image": fields.String
+    "author_image": fields.String,
 })
 
 category_model = api.model("CategoryModel", {
@@ -71,10 +72,10 @@ book_model = api.model("BookModel", {
     "description": fields.String,
     "price": fields.String,
     "publisher": fields.String,
-    "category_id": fields.Integer,
-    "author_id": fields.Integer,
+    "category": fields.Nested(category_model),
+    "author": fields.Nested(author_model),
     "book_image": fields.String,
-    "book_pdf": fields.String
+    "book_pdf": fields.String,
 })
 
 book_input_model = api.model("BookInputModel", {
@@ -85,21 +86,46 @@ book_input_model = api.model("BookInputModel", {
     "category_id": fields.Integer(required=True),
     "author_id": fields.Integer(required=True),
     "book_image": fields.String,
-    "book_pdf": fields.String
+    "book_pdf": fields.String,
+})
+
+cart_model = api.model("CartModel", {
+    "id" : fields.Integer,
+    "user_id" : fields.Integer,
+    "book": fields.Nested(book_model),
+    "quantity" : fields.Integer,
+})
+
+cart_model_input = api.model("CartInputModel", {
+    "user_id" : fields.Integer,
+    "book_id" : fields.Integer,
+    "quantity" : fields.Integer,
 })
 
 payment_model = api.model("PaymentModel", {
-    "id" : fields.Integer,
-    "user_id" : fields.Integer,
-    "book_id" : fields.Integer,
-    "price" : fields.Float
-})
-payment_input_model = api.model("PaymentInputModel", {
-    "user_id" : fields.Integer,
-    "book_id" : fields.Integer,
-    "price" : fields.Float
+    'id': fields.Integer(required=True, description='Payment ID'),
+    'user_id': fields.Integer(required=True, description='User ID'),
+    'book_id': fields.Integer(required=True, description='Book ID'),
+    'card_number': fields.String(required=True, description='Credit Card Number'),
+    'card_holder_name': fields.String(required=True, description='Card Holder Name'),
+    'expiration_date': fields.String(required=True, description='Expiration Date (MM/YY)'),
+    'cvv': fields.String(required=True, description='CVV'),
+    'price': fields.Float(required=True, description='Price'),
 })
 
+payment_input_model = api.model("PaymentInputModel", {
+    'user_id': fields.Integer(required=True, description='User ID'),
+    'book_id': fields.Integer(required=True, description='Book ID'),
+    'card_number': fields.String(required=True, description='Credit Card Number'),
+    'card_holder_name': fields.String(required=True, description='Card Holder Name'),
+    'expiration_date': fields.String(required=True, description='Expiration Date (MM/YY)'),
+    'cvv': fields.String(required=True, description='CVV'),
+    'price': fields.Float(required=True, description='Price'),
+})
+
+parser = reqparse.RequestParser()
+parser.add_argument('user_id', type=int, help='User ID')
+parser.add_argument('book_id', type=int, help='Book ID')
 # image_model = api.model("ImageModel", {
 #     "id": fields.Integer,
 #     "file_path": fields.String

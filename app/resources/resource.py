@@ -1,75 +1,21 @@
 from flask_restx import Resource, Namespace, abort
-from flask import request,send_from_directory
-from flask_jwt_extended import jwt_required, create_access_token
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
-from flask import current_app
+from flask_jwt_extended import jwt_required
 from cloudinary.uploader import upload
 from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
 from app.authorize import authorizations
 
-# ns = Namespace('img')
-ns_auth = Namespace('auth')
 ns_profile = Namespace('profile', authorizations=authorizations)
 ns_author = Namespace('author', authorizations=authorizations)
 ns_category = Namespace('category', description='Category operations', authorizations=authorizations)
 ns_book = Namespace('books', description='Book operations', authorizations=authorizations)
-
 
 ns_profile.decorators = [jwt_required()]
 ns_author.decorators = [jwt_required()]
 ns_category.decorators = [jwt_required()]
 ns_book.decorators = [jwt_required()]
 
-# Register User (username and password)
-@ns_auth.route('/register')
-class Register(Resource): 
-    @ns_auth.expect(register_model)
-    @ns_auth.marshal_with(user_model)
-    def post(self):
-        data = ns_auth.payload
-        
-        if User.query.filter_by(username=data['username']).first() is not None:
-            return {"message": "Username already exists"}, 409
-        if User.query.filter_by(email=data['email']).first() is not None:
-            return {"message": "Email already exists"}, 409
-        
-        user = User(username=data['username'],
-                    email=data['email'],
-                    password_hash=generate_password_hash(data['password']),
-                    gender=data['gender'],
-                    role='user')
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        # Create a corresponding profile
-        profile = Profile(username=data['username'],
-                    email=data['email'],
-                    password_hash=generate_password_hash(data['password']),
-                    gender=data['gender'],
-                    role='user')
-        
-        db.session.add(profile)
-        db.session.commit()
-
-        return user,  201
-    
-# Login Endpoint
-@ns_auth.route('/login')
-class Login(Resource):
-    @ns_auth.expect(login_model)
-    def post(self):
-
-        user = User.query.filter_by(username=ns_auth.payload["username"]).first()
-        if not user:
-            return {"error": "User does not exist"}, 401
-        if not check_password_hash(user.password_hash, ns_auth.payload["password"]):
-            return {"error": "Incorrect Password"}, 401
-        return {"access_token": create_access_token(user.username)}
-    
 # Input profile
 @ns_profile.route('/profile')
 class ProfileAPIList(Resource):
@@ -321,7 +267,7 @@ class BookResource(Resource):
             category_id=data["category_id"],
             author_id=data["author_id"],
             book_image=image_url,
-            book_pdf=pdf_url
+            book_pdf=pdf_url,
         )
 
         db.session.add(book)
@@ -393,16 +339,7 @@ class BookAPI(Resource):
         db.session.commit()
         return {}, 204
 
-@ns_book.route('/payment')
-class PaymentAPI(Resource):
-    @ns_book.doc(security="jsonWebToken")
-    @ns_book.marshal_with(payment_model)
-    def get(self, id):
-        # Include the 'author' and 'category' relationships in the query to fetch author and category information
-        payment = Book.query.options(db.joinedload('user'), db.joinedload('book')).get(id)
-        if payment is None:
-            return abort(404, message="Book not found.")
-        return payment
+
 
 def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'txt','png', 'jpg', 'jpeg', 'gif'}
