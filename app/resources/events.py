@@ -31,7 +31,7 @@ class EventListAPI(Resource):
         # Extract 'user_id', 'book_id', and 'quantity' from the payload
         user_id = addCart.get('user_id')
         book_id = addCart.get('book_id')
-        quantity = addCart.get('quantity')
+        quantity = addCart.get('quanchtity')
         
         # Check if any of the required fields are missing
         if user_id is None or book_id is None or quantity is None:
