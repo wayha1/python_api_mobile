@@ -26,6 +26,9 @@ def upload_photo(file_path):
         media_body=file_path
     ).execute()
     
+    
+    
+    
 upload_photo("Project skinme (1).pdf")
 
 with app.app_context():
