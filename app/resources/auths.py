@@ -67,12 +67,6 @@ class Login(Resource):
         
         return {"access_token": access_token}
     
-    
-    
-    
-    
-    
-    
 # Logout Endpoint
 @ns_auth.route('/logout')
 class Logout(Resource):
