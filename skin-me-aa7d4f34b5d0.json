@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "skin-me",
+  "private_key_id": "aa7d4f34b5d0b2ee1c5f4b6fafec4c2bb53647e1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvY2W9nrZEtekz\nj1Q+07rmMShGbojKKa74qVEqq7lgf0j47nvwZiLnq/vH2WNsgIYl2DFMDCSd4NyN\nSZ3zXIGFfVM7IQ3+8F+NDVuulAarVbk35dQ3YsUc83t+MmD1dpTFKAGgI6pgc8RY\nleyLHsTcK9Ef1BIXgzZqdm8yqX+FZkwMw4QM3gL70T2vt1BszZCLscoqp2Lo1NXV\nhaiGVVf97QqSfbyPfH2Ytzux0n0TJcrtvDy6bHRdcnVlg0328e3U7HhHPtBGSpTa\n6F0ivvl6g1Zyf8YYq/aAiS1x4AgM9FyasKfkCzAhfUeY+BpbqZRVlT5DWPWMEkLz\nUiu0/nMlAgMBAAECggEAVDRUDfBLkPyHXFZFe656rnbOX9ZEvU667y6XRfXRWAd0\nWPNitL3Mp062YLI5nkesYDIGJP01fUkOipTcDRGOK7FKSvqpNgtgzJ8rs8rk0tCi\nzrf8paS5fxdU5Hc6fs7ySR/We/RzocAi9ebw/LAGkrBExFO0Ze58qyt2YqvnCfuQ\ntk04IUkuaCyEWvpBxYiO2uS4dRkHGhfaaD+c1ekHucBnhinjTNFv8mDJ6oJC027J\n6+B8Hly7nUym5ZNy/k524qgE3+CvTwLS9bD23V2IPqS4WayqDh1KQUAI0yqrwj4x\nQzOKpHFoRoLSRMOjP0OEbQT/rQ6bRCZEV3l3AvY6VwKBgQDvH48KTe7I3PtNDPft\n60YoqNAFHDt0Bs6t22c2N7YzIavlLxMQAjMbvXiMbMtwysc50O6iceZwrLrY4Ek3\nhJdgvDw0PkiGc2nKJ3k6WqKPLGWOVMT07DT9+kRRbJ1lwzCdqmX6myiYWNFy90O9\nQLpgpcRkcNDKFl3v1vhSJDNHlwKBgQC7xEjl2t0FVIfm3kqG+l1JLT7o2lJmd5RB\nCy8xsImLo1ZC3XWvxasTMIBvQICckVI/+S8Ou7VOVc5F57dfJjdHhOZwqaNurc38\nPehzFCoepUd7zc7mOUW1G6V6z+2GvFrIAuWImEgIXlnq51e3m8fJ8N56Mp4aKg/z\nNDEEyRLSowKBgQDh1MY8jxmCreDQBf1ovxhFchjzmpQzofIzk9BIDhmO9K/pBKpW\nJh2qhyiARodkAL5ixgV5eWSO6TKVfEzpl9l3TI73MBNCl2FDwD/nco2v9df7sedJ\nAIOTkXZQB+omn08cuD8TjNGr/8Xfc9KPu7/JYwS1by5gjPsudbGTsgiUBQKBgQCb\ngCQrD8WJO4dNQH0SKdgF2U3HQ7+IErIZ5+xOx3gxx7SRrZxgVGCohLto509b2tH2\nHyTEm9m8JT2uEQeA6kJPnZXGagbqi1AS/SY739A+Dv0TX89gRMAhC+NQwVBiDC1W\nhWeYZx0IqTLoYmz3pzCfYjatlqvu2TTaYjfSUb+f5wKBgD7xvQ54owsGw/CIPRti\nZWZpV8rNx4DVVTL41K6F0G4QnpO73cJ03GPlnsatHwvEK3mwT2Xg+RLMLUpWztqW\njVBuACOv2koirMxH2tcsz75dSTAkinYfgrbkY/Ikmyt2yljZOc4CQNXgMRZKrqzI\ncYzqEEEWumlAUH80lCqeZn3W\n-----END PRIVATE KEY-----\n",
+  "client_email": "mobileproject@skin-me.iam.gserviceaccount.com",
+  "client_id": "111998769199883009807",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mobileproject%40skin-me.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

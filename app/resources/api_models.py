@@ -23,6 +23,11 @@ user_model = api.model("UserModel", {
     "role": fields.String,
 })
 
+register_ouput_model = api.model("RegisterOutput",{
+    "user":fields.Nested(user_model),
+    "access_token":fields.String
+})
+
 profile_model = api.model("ProfileModel", {
     "id": fields.Integer,
     "username": fields.String,
@@ -37,8 +42,8 @@ profile_input_model = api.model("ProfileInputModel", {
     "username": fields.String(required=True),
     "email": fields.String(required=True),
     "password_hash": fields.String,
-    "gender": fields.String(required=True),
-    "role": fields.String(required=True),
+    "gender": fields.String,
+    "role": fields.String,
     "profile_image": fields.String,
 })
 

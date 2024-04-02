@@ -12,7 +12,7 @@ ns_auth = Namespace('auth')
 @ns_auth.route('/register')
 class Register(Resource): 
     @ns_auth.expect(register_model)
-    @ns_auth.marshal_with(user_model)
+    @ns_auth.marshal_with(register_ouput_model)
     def post(self):
         data = ns_auth.payload
         
@@ -27,25 +27,24 @@ class Register(Resource):
                     gender=data['gender'],
                     role='user')
         
+        print(user)
         db.session.add(user)
         db.session.commit()
-        
         access_token = create_access_token(identity=user.username)
 
         # Create a corresponding profile
-        profile = Profile(username=data['username'],
-                    email=data['email'],
-                    password_hash=generate_password_hash(data['password']),
-                    gender=data['gender'],
-                    role='user')
+        # profile = Profile(username=data['username'],
+        #             email=data['email'],
+        #             password_hash=generate_password_hash(data['password']),
+        #             gender=data['gender'],
+        #             role='user')
         
-        user.access_token = access_token
-        profile.access_token = access_token
+        # profile.access_token = access_token
         
-        db.session.add(profile)
-        db.session.commit()
+        # db.session.add(profile)
+        # db.session.commit()
 
-        return user, 201
+        return {"user":user,"access_token":access_token}, 201  
     
 # Login Endpoint
 @ns_auth.route('/login')
@@ -67,6 +66,16 @@ class Login(Resource):
         db.session.commit()
         
         return {"access_token": access_token}
+    
+# Logout Endpoint
+@ns_auth.route('/logout')
+class Logout(Resource):
+    @jwt_required()
+    @ns_auth.doc(security="jsonWebToken")
+    def post(self):
+        jti = get_jwt()["jti"]  # Get the JWT ID (jti) of the current token
+        blocklist.add(jti)  # Add the token to the blocklist
+        return {"message": "Successfully logged out"}, 200
     
 # Protected Endpoint
 @ns_auth.route("/protected")
