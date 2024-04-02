@@ -9,6 +9,7 @@ class User(db.Model, UserMixin):
     gender = db.Column(db.String(10))
     role = db.Column(db.String)
     
+    
     profile = db.relationship('Profile', back_populates='user')
     user_payments = db.relationship('Payment', back_populates='user')
     

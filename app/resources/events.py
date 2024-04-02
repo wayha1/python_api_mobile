@@ -58,6 +58,8 @@ class EventAPI(Resource):
             abort(404, message="Cart item not found")
         return cart, 200
     
+    
+    
     @ns_events.doc(security="jsonWebToken")
     @ns_events.expect(cart_model_input)
     @ns_events.marshal_with(cart_model)

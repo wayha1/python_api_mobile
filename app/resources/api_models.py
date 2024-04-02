@@ -23,6 +23,9 @@ user_model = api.model("UserModel", {
     "role": fields.String,
 })
 
+
+
+
 register_ouput_model = api.model("RegisterOutput",{
     "user":fields.Nested(user_model),
     "access_token":fields.String
