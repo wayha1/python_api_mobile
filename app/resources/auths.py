@@ -74,8 +74,11 @@ class Logout(Resource):
     @ns_auth.doc(security="jsonWebToken")
     def post(self):
         jti = get_jwt()["jti"]  # Get the JWT ID (jti) of the current token
-        blocklist.add(jti)  # Add the token to the blocklist
+        token = TokenBlocklist(jti=jti)
+        db.session.add(token)
+        db.session.commit()
         return {"message": "Successfully logged out"}, 200
+
     
 # Protected Endpoint
 @ns_auth.route("/protected")

@@ -1,4 +1,4 @@
-from flask import Flask , jsonify, render_template
+from flask import Flask , jsonify
 from flask_cors import CORS
 from .config import Config
 from .extensions import api, db, jwt, login_manager
@@ -70,6 +70,14 @@ def create_app():
                         "message": "Request doesn't contain valid token",
                         "error" : "authorization_header"
                         }), 401
+        
+    @jwt.token_in_blocklist_loader
+    def token_in_blocklist_callback(jwt_header, jwt_data):
+        jti = jwt_data['jti']
+        
+        token = db.session.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).scalar()
+        
+        return token is not None 
         
 
     return app
