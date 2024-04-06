@@ -153,3 +153,37 @@ class UserBookAPI(Resource):
     def get(self):
         userbooks = UserBook.query.all()
         return userbooks
+    
+    @ns_events.doc(security= "jsonWebToken")
+    @ns_events.expect(userbook_model_input)
+    @ns_events.marshal_with(userbook_model)
+    def post(self):
+        userbook_data = ns_events.payload
+         # Extract user_id and book_id from the payload
+        user_id = userbook_data.get("user_id")
+        book_id = userbook_data.get("book_id")
+        
+        # Check if user_id and book_id are present
+        if user_id is None or book_id is None:
+            return {'message': 'Missing user_id or book_id in request payload'}, 400
+        
+        # Create a new userbook entry
+        userbook = UserBook(
+            user_id=user_id,
+            book_id=book_id
+        )
+        db.session.add(userbook)
+        db.session.commit()
+        
+        return userbook, 201
+    
+@ns_events.route('/userbook/<int:id>')
+class UserBookDetailAPI(Resource):
+    @ns_events.doc(security="jsonWebToken")
+    def delete(self, id):
+        userbook = UserBook.query.get(id)
+        if not userbook:
+            abort(404, message="UserBook entry not found")
+        db.session.delete(userbook)
+        db.session.commit()
+        return {}, 204
