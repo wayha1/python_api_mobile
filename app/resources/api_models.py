@@ -97,7 +97,7 @@ book_input_model = api.model("BookInputModel", {
 
 cart_model = api.model("CartModel", {
     "id" : fields.Integer,
-    "user_id" : fields.Integer,
+    "user_id" : fields.Nested(user_model),
     "book": fields.Nested(book_model),
     "quantity" : fields.Integer,
 })
@@ -110,8 +110,8 @@ cart_model_input = api.model("CartInputModel", {
 
 payment_model = api.model("PaymentModel", {
     'id': fields.Integer(required=True, description='Payment ID'),
-    'user_id': fields.Integer(required=True, description='User ID'),
-    'book_id': fields.Integer(required=True, description='Book ID'),
+    'user_id': fields.Nested(user_model),
+    'book_id': fields.Nested(book_model),
     'card_number': fields.String(required=True, description='Credit Card Number'),
     'card_holder_name': fields.String(required=True, description='Card Holder Name'),
     'expiration_date': fields.String(required=True, description='Expiration Date (MM/YY)'),

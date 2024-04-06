@@ -128,14 +128,14 @@ def profile():
                 cloudinary_response = upload(profile_image)
                 cloudinary_url = cloudinary_response['secure_url']
 
-                profile = Profile.query.filter_by(username=username).first()
+                profile = User.query.filter_by(username=username).first()
                 if profile:
                     profile.email = email
                     profile.gender = gender
                     profile.role = role
                     profile.profile_image = cloudinary_url
                 else:
-                    profile = Profile(
+                    profile = User(
                         username=username,
                         email=email,
                         gender=gender,
@@ -152,7 +152,7 @@ def profile():
         except Exception as e:
             flash('Error creating/updating profile: {}'.format(str(e)), 'error')
 
-    profiles = Profile.query.all()
+    profiles = User.query.all()
 
     if request.method == 'POST':
         if 'edit_profile' in request.form:
@@ -167,7 +167,7 @@ def profile():
                 cloudinary_response = upload(new_profile_image)
                 new_cloudinary_url = cloudinary_response['secure_url']
 
-                profile = Profile.query.get(profile_id)
+                profile = User.query.get(profile_id)
                 if profile:
                     profile.username = new_username
                     profile.email = new_email

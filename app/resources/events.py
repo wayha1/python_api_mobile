@@ -18,7 +18,7 @@ class EventListAPI(Resource):
         payments = Cart.query.all()
         return payments, 200
     
-    @ns_events.doc(security= "jsonWebTOken")
+    @ns_events.doc(security= "jsonWebToken")
     @ns_events.expect(cart_model_input)
     @ns_events.marshal_with(cart_model)
     def post(self):
@@ -28,10 +28,12 @@ class EventListAPI(Resource):
         if 'user_id' not in addCart:
             return {'message': 'Missing user_id in request payload'}, 400
         
-        # Extract 'user_id', 'book_id', and 'quantity' from the payload
+        # Extract 'user_id' from the payload
         user_id = addCart.get('user_id')
-        book_id = addCart.get('book_id')
-        quantity = addCart.get('quanchtity')
+        
+        # Extract nested 'book_id' and 'quantity' from the payload
+        book_id = addCart.get('book', {}).get('id')
+        quantity = addCart.get('quantity')
         
         # Check if any of the required fields are missing
         if user_id is None or book_id is None or quantity is None:
@@ -57,8 +59,6 @@ class EventAPI(Resource):
         if not cart:
             abort(404, message="Cart item not found")
         return cart, 200
-    
-    
     
     @ns_events.doc(security="jsonWebToken")
     @ns_events.expect(cart_model_input)
