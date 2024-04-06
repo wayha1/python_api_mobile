@@ -109,7 +109,6 @@ class PaymentAPI(Resource):
         db.session.commit()
         return payment, 201
 
-
 @ns_events.route('/payment/<int:id>')
 class PaymentDetailAPI(Resource):
     @ns_events.doc(security="jsonWebToken")
@@ -146,3 +145,11 @@ class PaymentDetailAPI(Resource):
         db.session.delete(payment)
         db.session.commit()
         return {}, 204
+    
+@ns_events.route('/userbook')
+class UserBookAPI(Resource):
+    @ns_events.doc(security="jsonWebToken")
+    @ns_events.marshal_with(userbook_model)
+    def get(self):
+        userbooks = UserBook.query.all()
+        return userbooks

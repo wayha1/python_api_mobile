@@ -120,16 +120,12 @@ class Cart(db.Model):
     user = db.relationship('User', back_populates='cart')
     book = db.relationship('Book', back_populates='carts')
 
-
 # Modify the User and Book models to include the relationships with Cart
 User.cart = db.relationship('Cart', back_populates='user')
 Book.carts = db.relationship('Cart', back_populates='book')
 
 class UserBook(db.Model):
-    tablename = 'user_book'
-    
     id = db.Column(db.Integer, primary_key=True)
-    
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
     
