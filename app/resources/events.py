@@ -1,5 +1,5 @@
 from flask_restx import Resource, Namespace, abort
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
@@ -15,41 +15,52 @@ class EventListAPI(Resource):
     @ns_events.marshal_list_with(cart_model)
     @jwt_required()
     def get(self):
-        payments = Cart.query.all()
-        return payments, 200
+        cart = Cart.query.all()
+        return cart, 200
     
     @ns_events.doc(security= "jsonWebToken")
     @ns_events.expect(cart_model_input)
     @ns_events.marshal_with(cart_model)
+    @jwt_required()  # Ensure user is authenticated
     def post(self):
-        addCart = ns_events.payload
-        
-        # Check if 'user_id' is present in the payload
-        if 'user_id' not in addCart:
-            return {'message': 'Missing user_id in request payload'}, 400
-        
-        # Extract 'user_id' from the payload
-        user_id = addCart.get('user_id')
-        
-        # Extract nested 'book_id' and 'quantity' from the payload
-        book_id = addCart.get('book', {}).get('id')
-        quantity = addCart.get('quantity')
-        
-        # Check if any of the required fields are missing
-        if user_id is None or book_id is None or quantity is None:
-            return {'message': 'Missing required fields in request payload'}, 400
-        
-        # Create and add the cart item to the database
-        cart = Cart(
-            user_id=user_id,
-            book_id=book_id,
-            quantity=quantity
-        )
-        db.session.add(cart)
-        db.session.commit()
-        
-        return cart, 201
+        add_cart_data = ns_events.payload
 
+        # Extract username from JWT token
+        current_username = get_jwt_identity()
+
+        # Get user object from the database
+        user = User.query.filter_by(username=current_username).first()
+
+        # Extract book_id and quantity from the payload
+        book_id = add_cart_data.get('book_id')
+        quantity = add_cart_data.get('quantity')
+
+        # Check if any of the required fields are missing
+        if book_id is None or quantity is None:
+            return {'message': 'Missing required fields in request payload'}, 400
+
+        # Check if the user exists
+        if not user:
+            return {'message': 'User not found'}, 404
+
+        # Check if the cart item already exists for the user and book
+        existing_cart_item = Cart.query.filter_by(user_id=user.id, book_id=book_id).first()
+        if existing_cart_item:
+            # If the cart item already exists, update the quantity
+            existing_cart_item.quantity += quantity
+            db.session.commit()
+            return existing_cart_item, 200
+        else:
+            # If the cart item doesn't exist, create a new one
+            cart = Cart(
+                user_id=user.id,
+                book_id=book_id,
+                quantity=quantity
+            )
+            db.session.add(cart)
+            db.session.commit()
+            return cart, 201
+        
 @ns_events.route('/cart/<int:id>')
 class EventAPI(Resource):
     @ns_events.doc(security="jsonWebToken")
@@ -59,7 +70,27 @@ class EventAPI(Resource):
         if not cart:
             abort(404, message="Cart item not found")
         return cart, 200
+
+    @ns_events.doc(security="jsonWebToken")
+    @ns_events.expect(cart_model_input)
+    @ns_events.marshal_with(cart_model)
+    def post(self, id):
+        cart_data = ns_events.payload
+        cart = Cart.query.get(id)
+        if not cart:
+            abort(404, message="Cart item not found")
     
+    # Update the cart item with the provided data
+        cart.user_id = cart_data.get("user_id", cart.user_id)
+        cart.book_id = cart_data.get("book_id", cart.book_id)
+        cart.quantity = cart_data.get("quantity", cart.quantity)
+    
+    # Commit the changes to the database
+        db.session.commit()
+    
+        return cart, 200
+
+            
     @ns_events.doc(security="jsonWebToken")
     @ns_events.expect(cart_model_input)
     @ns_events.marshal_with(cart_model)
@@ -150,31 +181,56 @@ class PaymentDetailAPI(Resource):
 class UserBookAPI(Resource):
     @ns_events.doc(security="jsonWebToken")
     @ns_events.marshal_with(userbook_model)
+    @jwt_required()
     def get(self):
-        userbooks = UserBook.query.all()
+        current_username = get_jwt_identity()
+        user = User.query.filter_by(username=current_username).first()
+        if not user:
+            abort(404, message="User not found")
+
+        userbooks = UserBook.query.filter_by(user_id=user.id).all()
+        if not userbooks:
+            abort(404, message="No UserBook entries found for the user")
+
         return userbooks
-    
-    @ns_events.doc(security= "jsonWebToken")
+
+    @ns_events.doc(security="jsonWebToken")
     @ns_events.expect(userbook_model_input)
     @ns_events.marshal_with(userbook_model)
+    @jwt_required()
     def post(self):
         userbook_data = ns_events.payload
-         # Extract user_id and book_id from the payload
-        user_id = userbook_data.get("user_id")
-        book_id = userbook_data.get("book_id")
-        
-        # Check if user_id and book_id are present
-        if user_id is None or book_id is None:
-            return {'message': 'Missing user_id or book_id in request payload'}, 400
-        
+
+        # Extract username from JWT token
+        current_username = get_jwt_identity()
+
+        # Get user object from the database
+        user = User.query.filter_by(username=current_username).first()
+
+        # Extract book_id from the payload
+        book_id = userbook_data.get('book_id')
+
+        # Check if book_id is present
+        if book_id is None:
+            return {'message': 'Missing book_id in request payload'}, 400
+
+        # Check if the user exists
+        if not user:
+            return {'message': 'User not found'}, 404
+
+        # Check if the user already has the book in their userbook entries
+        existing_userbook = UserBook.query.filter_by(user_id=user.id, book_id=book_id).first()
+        if existing_userbook:
+            return {'message': 'User already has this book in their userbook entries'}, 400
+
         # Create a new userbook entry
         userbook = UserBook(
-            user_id=user_id,
+            user_id=user.id,
             book_id=book_id
         )
         db.session.add(userbook)
         db.session.commit()
-        
+
         return userbook, 201
     
 @ns_events.route('/userbook/<int:id>')
@@ -187,3 +243,4 @@ class UserBookDetailAPI(Resource):
         db.session.delete(userbook)
         db.session.commit()
         return {}, 204
+

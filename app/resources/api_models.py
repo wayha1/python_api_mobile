@@ -1,6 +1,15 @@
 from flask_restx import fields, reqparse
 from app.extensions import *
 
+user_model = api.model("UserModel", {
+    "id": fields.Integer,
+    "username": fields.String,
+    "email": fields.String,
+    "password_hash": fields.String,
+    "gender": fields.String,
+    "role": fields.String,
+})
+
 login_model = api.model("LoginModel", {
     "username": fields.String,
     "password": fields.String
@@ -14,19 +23,9 @@ register_model = api.model("RegisterModel",{
     "role": fields.String,
 })
 
-user_model = api.model("UserModel", {
-    "id": fields.Integer,
-    "username": fields.String,
-    "email": fields.String,
-    "password_hash": fields.String,
-    "gender": fields.String,
-    "role": fields.String,
-})
-
-
-register_ouput_model = api.model("RegisterOutput",{
-    "user":fields.Nested(user_model),
-    "access_token":fields.String
+register_input_model = api.model("RegisterOutput",{
+    "user": fields.Nested(user_model),
+    "access_token": fields.String
 })
 
 profile_model = api.model("ProfileModel", {
@@ -130,14 +129,14 @@ payment_input_model = api.model("PaymentInputModel", {
 })
 
 userbook_model = api.model("UserBook", {
-    'id': fields.Integer,
-    'user_id': fields.Nested(user_model),
-    'book_id': fields.Nested(book_model)
+    "id" : fields.Integer,
+    "user_id" : fields.Nested(user_model),
+    "book_id": fields.Nested(book_model)
 })
 
 userbook_model_input = api.model("UserInputBook", {
-    'user_id': fields.Nested(user_model),
-    'book_id': fields.Nested(book_model)
+    "user_id" : fields.Integer,
+    "book_id": fields.Integer
 })
 
 

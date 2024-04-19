@@ -5,47 +5,57 @@ from app.resources.api_models import *
 from app.models import *
 from app.extensions import db
 
-ns_auth = Namespace('auth')
+ns_auth = Namespace('authorization')
 
 
 # Register User (username and password)
 @ns_auth.route('/register')
 class Register(Resource): 
     @ns_auth.expect(register_model)
-    @ns_auth.marshal_with(register_ouput_model)
+    @ns_auth.marshal_with(register_input_model)
     def post(self):
         data = ns_auth.payload
         
+        # Check if username or email already exists
         if User.query.filter_by(username=data['username']).first() is not None:
             return {"message": "Username already exists"}, 409
         if User.query.filter_by(email=data['email']).first() is not None:
             return {"message": "Email already exists"}, 409
         
-        user = User(username=data['username'],
-                    email=data['email'],
-                    password_hash=generate_password_hash(data['password']),
-                    gender=data['gender'],
-                    role='user')
+        # Create a new User instance with the provided data
+        user = User(
+            username=data['username'],
+            email=data['email'],
+            password_hash=generate_password_hash(data['password']),
+            gender=data['gender'],
+            role='user'
+        )
         
-        print(user)
+        # Add the user to the database session
         db.session.add(user)
+        
+        # Commit the transaction to save the user to the database
         db.session.commit()
+        
+        # Now that the user is committed to the database, the user ID should be assigned
+        print('User ID:', user.id)
+        
+        # Generate access token for the registered user
         access_token = create_access_token(identity=user.username)
 
-        # Create a corresponding profile
-        # profile = Profile(username=data['username'],
-        #             email=data['email'],
-        #             password_hash=generate_password_hash(data['password']),
-        #             gender=data['gender'],
-        #             role='user')
-        
-        # profile.access_token = access_token
-        
-        # db.session.add(profile)
-        # db.session.commit()
-
-        return {"user":user,"access_token":access_token}, 201  
-    
+        # Return the response with the access token and user ID
+        return {
+        "user": {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "password_hash": user.password_hash,
+        "gender": user.gender,
+        "role": user.role
+    },
+        "access_token": access_token,
+        "user_id": user.id
+}
 # Login Endpoint
 @ns_auth.route('/login')
 class Login(Resource):
@@ -65,7 +75,7 @@ class Login(Resource):
         user.access_token = access_token
         db.session.commit()
         
-        return {"access_token": access_token}
+        return {"access_token": access_token, "user_id": user.id}
     
 # Logout Endpoint
 @ns_auth.route('/logout')
