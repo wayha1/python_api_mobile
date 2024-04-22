@@ -96,7 +96,7 @@ book_input_model = api.model("BookInputModel", {
 
 cart_model = api.model("CartModel", {
     "id" : fields.Integer,
-    "user_id" : fields.Nested(user_model),
+    "user" : fields.Nested(user_model),
     "book": fields.Nested(book_model),
     "quantity" : fields.Integer,
 })
@@ -109,8 +109,8 @@ cart_model_input = api.model("CartInputModel", {
 
 payment_model = api.model("PaymentModel", {
     'id': fields.Integer,
-    'user_id': fields.Nested(user_model),
-    'book_id': fields.Nested(book_model),
+    'user': fields.Nested(user_model),
+    'book': fields.Nested(book_model),
     'card_number': fields.String,
     'card_holder_name': fields.String,
     'expiration_date': fields.String,
@@ -130,15 +130,14 @@ payment_input_model = api.model("PaymentInputModel", {
 
 userbook_model = api.model("UserBook", {
     "id" : fields.Integer,
-    "user_id" : fields.Nested(user_model),
-    "book_id": fields.Nested(book_model)
+    "user" : fields.Nested(user_model),
+    "book": fields.Nested(book_model)
 })
 
 userbook_model_input = api.model("UserInputBook", {
     "user_id" : fields.Integer,
     "book_id": fields.Integer
 })
-
 
 parser = reqparse.RequestParser()
 parser.add_argument('user_id', type=int, help='User ID')
