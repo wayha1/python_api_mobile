@@ -11,12 +11,24 @@ ns_events.decorators = [jwt_required()]
 
 @ns_events.route('/cart')
 class EventListAPI(Resource):
-    @ns_events.doc(security= "jsonWebToken")
+    @ns_events.doc(security="jsonWebToken")
     @ns_events.marshal_list_with(cart_model)
     @jwt_required()
     def get(self):
-        cart = Cart.query.all()
-        return cart, 200
+        # Extract username from JWT token
+        current_username = get_jwt_identity()
+
+        # Get user object from the database
+        user = User.query.filter_by(username=current_username).first()
+
+        if not user:
+            abort(404, message="User not found")
+
+        # Retrieve cart items for the current user
+        cart_items = Cart.query.filter_by(user_id=user.id).all()
+
+        return cart_items, 200
+
     
     @ns_events.doc(security= "jsonWebToken")
     @ns_events.expect(cart_model_input)
