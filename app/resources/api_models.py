@@ -96,7 +96,7 @@ book_input_model = api.model("BookInputModel", {
 
 cart_model = api.model("CartModel", {
     "id" : fields.Integer,
-    "user_id" : fields.Nested(user_model),
+    "user" : fields.Nested(user_model),
     "book": fields.Nested(book_model),
     "quantity" : fields.Integer,
 })
@@ -130,8 +130,8 @@ payment_input_model = api.model("PaymentInputModel", {
 
 userbook_model = api.model("UserBook", {
     "id" : fields.Integer,
-    "user_id" : fields.Nested(user_model),
-    "book_id": fields.Nested(book_model)
+    "user" : fields.Nested(user_model),
+    "book": fields.Nested(book_model)
 })
 
 userbook_model_input = api.model("UserInputBook", {
