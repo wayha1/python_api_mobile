@@ -1,5 +1,6 @@
 from flask_restx import Resource, Namespace, abort
 from flask_jwt_extended import jwt_required
+from sqlalchemy import func
 from cloudinary.uploader import upload
 from app.resources.api_models import *
 from app.models import *
@@ -274,18 +275,32 @@ class BookResource(Resource):
         db.session.commit()
 
         return book, 201
-    
+
+@ns_book.route('/book/<string:title>')
+class BookSearch(Resource):
+    @ns_book.doc(security= "jsonWebToken")
+    @ns_book.marshal_with(book_model)
+    def get(self, title):
+        # Perform a case-insensitive search for books by title
+        books = Book.query.filter(func.lower(Book.title) == func.lower(title)).all()
+        
+        if not books:
+            return abort(404, message="No books found with the given title.")
+        
+        return books
+
 @ns_book.route('/book/<int:id>')
 class BookAPI(Resource):
     @ns_book.doc(security="jsonWebToken")
     @ns_book.marshal_with(book_model)
     def get(self, id):
-        # Include the 'author' and 'category' relationships in the query to fetch author and category information
-        book = Book.query.options(db.joinedload('author'), db.joinedload('category')).get(id)
+        # Retrieve the book by its ID and load its related author and category information
+        book = Book.query.options(db.joinedload(Book.author), db.joinedload(Book.category)).get(id)
         if book is None:
             return abort(404, message="Book not found.")
         return book
-
+    
+    
     @ns_book.doc(security="jsonWebToken")
     @ns_book.expect(book_input_model)
     @ns_book.marshal_with(book_model)  
