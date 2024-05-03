@@ -56,6 +56,7 @@ class Register(Resource):
         "access_token": access_token,
         "user_id": user.id
 }
+
 # Login Endpoint
 @ns_auth.route('/login')
 class Login(Resource):
