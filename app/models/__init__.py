@@ -81,20 +81,6 @@ class Book(db.Model):
     
     # Define the relationship with Payment
     book_payments = db.relationship('Payment', back_populates='book')
-
-# class ImageModel(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     file_path = db.Column(db.String(255), nullable=False)
-
-#     # Define the one-to-one relationship with back_populates
-#     book = db.relationship('Book', back_populates='image', uselist=False)
-
-# class PDFModel(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     file_path = db.Column(db.String(255), nullable=False)
-
-#     # Define the one-to-one relationship with back_populates
-#     book = db.relationship('Book', back_populates='pdf', uselist=False)    
     
 class BookAuthor(db.Model):
     __tablename__ = 'book_author'

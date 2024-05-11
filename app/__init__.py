@@ -20,7 +20,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite3"
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config["JWT_SECRET_KEY"] = '07920ca637344a93a3403f4d062272f7'
-    # app.config["JWT_ACCESS_TOKEN_EXPIRES"] = None
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=365)
 
     # app.config['UPLOAD_FOLDER'] = 'assets/'
    
